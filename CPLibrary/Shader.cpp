@@ -1,5 +1,5 @@
 #include "Shader.h"
-#include "Globals.h"
+#include "CPL.h"
 
 #include <fstream>
 #include <sstream>

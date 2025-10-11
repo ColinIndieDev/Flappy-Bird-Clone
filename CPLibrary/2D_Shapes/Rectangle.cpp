@@ -1,0 +1,53 @@
+#include "Rectangle.h"
+#include "../CPL.h"
+#include "../Shader.h"
+
+namespace CPL {
+    Rectangle::Rectangle(const glm::vec2 pos, const glm::vec2 size, const Color color) : position(pos), size(size), color(color) {
+        const float vertices[] = {
+            size.x, 0.0f, 0.0f,  // top right
+            size.x, size.y, 0.0f,  // bottom right
+            0.0f, size.y, 0.0f,  // bottom left
+            0.0f,  0.0f, 0.0f   // top left
+        };
+        const unsigned int indices[] = {
+            0, 1, 3,  // first Triangle
+            1, 2, 3   // second Triangle
+        };
+
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    void Rectangle::Draw(const Shader& shader) const {
+        auto transform = glm::mat4(1.0f);
+        const glm::vec2 center = {position.x + size.x / 2, position.y + size.y / 2};
+        transform = glm::translate(transform, glm::vec3(center, 0.0f));
+        transform = glm::rotate(transform, glm::radians(rotationAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+        transform = glm::translate(transform, glm::vec3(-center, 0.0f));
+
+        shader.SetMatrix4fv("transform", transform);
+
+        shader.SetMatrix4fv("projection", projection);
+        shader.SetVector3f("offset", glm::vec3(position, 0.0f));
+        shader.SetColor("inputColor", color);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
+    }
+}

@@ -1,12 +1,12 @@
 #include "Circle.h"
-#include "Globals.h"
+#include "../CPL.h"
 #include <cmath>
 #include <vector>
 
-#include "Shader.h"
+#include "../Shader.h"
 
 namespace CPL {
-    Circle::Circle() {
+    Circle::Circle(const glm::vec2 pos, const float radius, const Color color) : position(pos), radius(radius), color(color) {
         std::vector vertices = {
             0.0f, 0.0f, 0.0f // Center
         };
@@ -14,8 +14,8 @@ namespace CPL {
         constexpr int segments = 100;
         for (int i = 0; i <= segments; i++) {
             const float theta = 2 * static_cast<float>(M_PI)  / static_cast<float>(segments) * static_cast<float>(i);
-            float x = 0.0f + 1.0f * std::cos(theta);
-            float y = 0.0f + 1.0f * std::sin(theta);
+            float x = 0.0f + radius * std::cos(theta);
+            float y = 0.0f +radius * std::sin(theta);
             vertices.push_back(x);
             vertices.push_back(y);
             vertices.push_back(0);
@@ -38,7 +38,17 @@ namespace CPL {
         glBindVertexArray(0);
     }
 
-    void Circle::Draw(const Shader& shader, const Color& color) const {
+    void Circle::Draw(const Shader& shader) const {
+        auto transform = glm::mat4(1.0f);
+        const glm::vec2 center = {position.x, position.y};
+        transform = glm::translate(transform, glm::vec3(center, 0.0f));
+        transform = glm::rotate(transform, -glm::radians(rotationAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+        transform = glm::translate(transform, glm::vec3(-center, 0.0f));
+
+        shader.SetMatrix4fv("transform", transform);
+
+        shader.SetMatrix4fv("projection", projection);
+        shader.SetVector3f("offset", glm::vec3(position, 0.0f));
         shader.SetColor("inputColor", color);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);

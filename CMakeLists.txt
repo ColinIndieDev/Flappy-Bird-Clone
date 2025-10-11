@@ -21,14 +21,16 @@ add_subdirectory(external/glad)
 add_executable(OpenGLGame main.cpp
         CPLibrary/Shader.cpp
         CPLibrary/Shader.h
-        CPLibrary/Triangle.cpp
-        CPLibrary/Triangle.h
-        CPLibrary/Globals.h
-        CPLibrary/Globals.cpp
-        CPLibrary/Rectangle.cpp
-        CPLibrary/Rectangle.h
-        CPLibrary/Circle.cpp
-        CPLibrary/Circle.h)
+        CPLibrary/2D_Shapes/Triangle.cpp
+        CPLibrary/2D_Shapes/Triangle.h
+        CPLibrary/CPL.h
+        CPLibrary/CPL.cpp
+        CPLibrary/2D_Shapes/Rectangle.cpp
+        CPLibrary/2D_Shapes/Rectangle.h
+        CPLibrary/2D_Shapes/Circle.cpp
+        CPLibrary/2D_Shapes/Circle.h
+        CPLibrary/Colors.h
+        CPLibrary/KeyInputs.h)
 
 # GLM
 target_include_directories(OpenGLGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/glm/glm)

@@ -7,6 +7,8 @@
 #include <gtc/type_ptr.hpp>
 
 #include <iostream>
+#include "Colors.h"
+#include "KeyInputs.h"
 
 namespace CPL {
     struct Color {
@@ -22,15 +24,30 @@ namespace CPL {
     inline unsigned int SCREEN_HEIGHT;
     inline glm::mat4 projection;
 
+    extern Shader shapeShader;
+
     inline GLFWwindow* window;
 
-    void DrawTriangle(const Shader& shader, float x, float y, const Color& color);
-    void DrawRectangle(const Shader& shader, const Color& color);
-    void DrawCircle(const Shader& shader, const Color& color);
+    bool CheckCollisionRects(const Rectangle &one, const Rectangle &two);
+
+    void InitShaders();
+
+    void DrawTriangle(glm::vec2 position, glm::vec2 size, const Color& color);
+    void DrawTriangleRotated(glm::vec2 position, glm::vec2 size, float angle, const Color& color);
+    void DrawRectangle(glm::vec2 position, glm::vec2 size, const Color& color);
+    void DrawRectangleRotated(glm::vec2 position, glm::vec2 size, float angle, const Color& color);
+    void DrawCircle(glm::vec2 position, float radius, const Color& color);
+    void DrawCircleRotated(glm::vec2 position, float radius, float angle, const Color& color);
 
     inline void ClearBackground(const Color& color) {
         glClearColor(color.r, color.g, color.b, color.a);
         glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    void BeginDrawShape();
+
+    inline void EndDrawing() {
+        glUseProgram(0);
     }
 
     inline void framebuffer_size_callback(GLFWwindow* window, const int width, const int height) {
@@ -49,6 +66,17 @@ namespace CPL {
             lastTime += 1.0;
         }
     }
+    inline float deltaTime = 0;
+    inline float lastFrame = 0;
+
+    inline void CalculateDeltaTime() {
+        const auto currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+    }
+
+    inline float GetDeltaTime() { return deltaTime; }
+    inline float GetTime() { return static_cast<float>(glfwGetTime()); }
 
     inline void InitWindow(const int width, const int height, const char* title) {
         glfwInit();
@@ -78,10 +106,15 @@ namespace CPL {
         }
     }
 
-    inline void HandleInput(GLFWwindow* window) {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, true);
-        }
+    inline int WindowShouldClose() {
+        return glfwWindowShouldClose(window);
+    }
+
+    inline int IsKeyDown(const int keycode) {
+        return glfwGetKey(window, keycode) == GLFW_PRESS;
+    }
+    inline int IsKeyUp(const int keycode) {
+        return glfwGetKey(window, keycode) == GLFW_RELEASE;
     }
 
     inline void CloseWindow() { glfwTerminate(); }

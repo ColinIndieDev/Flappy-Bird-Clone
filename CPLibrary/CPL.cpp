@@ -1,0 +1,59 @@
+#include "CPL.h"
+#include "2D_Shapes/Triangle.h"
+#include "2D_Shapes/Rectangle.h"
+#include "2D_Shapes/Circle.h"
+#include "Shader.h"
+
+namespace CPL {
+    Shader shapeShader;
+
+    bool CheckCollisionRects(const Rectangle& one, const Rectangle& two) {
+        // X Axis
+        const bool collisionX = one.position.x + one.size.x >= two.position.x &&
+            two.position.x + two.size.x >= one.position.x;
+        // Y Axis
+        const bool collisionY = one.position.y + one.size.y >= two.position.y &&
+            two.position.y + two.size.y >= one.position.y;
+
+        return collisionX && collisionY;
+    }
+
+    void InitShaders() {
+        shapeShader = Shader("../CPLibrary/shaders/shader.vert", "../CPLibrary/shaders/shader.frag");
+    }
+
+    void BeginDrawShape() {
+        shapeShader.Use();
+    }
+
+    void DrawTriangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
+        const auto triangle = Triangle(position, size, color);
+        triangle.Draw(shapeShader);
+    }
+    void DrawTriangleRotated(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
+        const auto triangle = Triangle(position, size, color);
+        triangle.rotationAngle = angle;
+        triangle.Draw(shapeShader);
+    }
+
+    void DrawRectangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
+        const auto rectangle = Rectangle(position, size, color);
+        rectangle.Draw(shapeShader);
+    }
+    void DrawRectangleRotated(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
+        const auto rectangle = Rectangle(position, size, color);
+        rectangle.rotationAngle = angle;
+        rectangle.Draw(shapeShader);
+    }
+
+    void DrawCircle(const glm::vec2 position, const float radius, const Color& color) {
+        const auto circle = Circle(position, radius, color);
+        circle.Draw(shapeShader);
+    }
+    void DrawCircleRotated(const glm::vec2 position, const float radius, const float angle, const Color& color) {
+        const auto circle = Circle(position, radius, color);
+        circle.rotationAngle = angle;
+        circle.Draw(shapeShader);
+    }
+
+}
