@@ -19,11 +19,19 @@ FetchContent_MakeAvailable(glfw)
 add_subdirectory(external/glad)
 
 add_executable(OpenGLGame main.cpp
-        CPLib/Shader.cpp
-        CPLib/Shader.h
-        CPLib/Triangle.cpp
-        CPLib/Triangle.h
-        CPLib/CPLib.h)
+        CPLibrary/Shader.cpp
+        CPLibrary/Shader.h
+        CPLibrary/Triangle.cpp
+        CPLibrary/Triangle.h
+        CPLibrary/Globals.h
+        CPLibrary/Globals.cpp
+        CPLibrary/Rectangle.cpp
+        CPLibrary/Rectangle.h
+        CPLibrary/Circle.cpp
+        CPLibrary/Circle.h)
+
+# GLM
+target_include_directories(OpenGLGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/glm/glm)
 
 target_link_libraries(OpenGLGame PRIVATE glfw glad)
 
