@@ -15,6 +15,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+# FT Library
+include(FetchContent)
+FetchContent_Declare(
+        freetype
+        GIT_REPOSITORY https://github.com/freetype/freetype.git
+        GIT_TAG VER-2-14-1 # or write highest version
+)
+FetchContent_MakeAvailable(freetype)
+
 # GLAD
 add_subdirectory(external/glad)
 
@@ -30,12 +39,14 @@ add_executable(OpenGLGame main.cpp
         CPLibrary/2D_Shapes/Circle.cpp
         CPLibrary/2D_Shapes/Circle.h
         CPLibrary/Colors.h
-        CPLibrary/KeyInputs.h)
+        CPLibrary/KeyInputs.h
+        CPLibrary/Text.cpp
+        CPLibrary/Text.h)
 
 # GLM
 target_include_directories(OpenGLGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/glm/glm)
 
-target_link_libraries(OpenGLGame PRIVATE glfw glad)
+target_link_libraries(OpenGLGame PRIVATE glfw glad freetype)
 
 if (WIN32)
     target_link_libraries(OpenGLGame PRIVATE opengl32)

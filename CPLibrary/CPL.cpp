@@ -3,9 +3,11 @@
 #include "2D_Shapes/Rectangle.h"
 #include "2D_Shapes/Circle.h"
 #include "Shader.h"
+#include "Text.h"
 
 namespace CPL {
     Shader shapeShader;
+    Shader textShader;
 
     bool CheckCollisionRects(const Rectangle& one, const Rectangle& two) {
         // X Axis
@@ -20,10 +22,12 @@ namespace CPL {
 
     void InitShaders() {
         shapeShader = Shader("../CPLibrary/shaders/shader.vert", "../CPLibrary/shaders/shader.frag");
+        textShader = Shader("../CPLibrary/shaders/text.vert", "../CPLibrary/shaders/text.frag");
     }
 
-    void BeginDrawShape() {
-        shapeShader.Use();
+    void BeginDrawing(const DrawModes& mode) {
+        if (mode == SHAPE_2D) shapeShader.Use();
+        else if (mode == TEXT) textShader.Use();
     }
 
     void DrawTriangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
@@ -54,6 +58,10 @@ namespace CPL {
         const auto circle = Circle(position, radius, color);
         circle.rotationAngle = angle;
         circle.Draw(shapeShader);
+    }
+
+    void DrawText(const glm::vec2 position, const float scale, const std::string& text, const Color& color) {
+        Text::DrawText(textShader, text, position, scale, color);
     }
 
 }

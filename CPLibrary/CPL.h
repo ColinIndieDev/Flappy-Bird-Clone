@@ -11,6 +11,12 @@
 #include "KeyInputs.h"
 
 namespace CPL {
+    enum DrawModes {
+        SHAPE_2D,
+        TEXTURE_2D,
+        TEXT,
+    };
+
     struct Color {
         float r, g, b, a;
     };
@@ -20,11 +26,15 @@ namespace CPL {
     class Rectangle;
     class Circle;
 
+    struct Character;
+    class Text;
+
     inline unsigned int SCREEN_WIDTH;
     inline unsigned int SCREEN_HEIGHT;
     inline glm::mat4 projection;
 
     extern Shader shapeShader;
+    extern Shader textShader;
 
     inline GLFWwindow* window;
 
@@ -39,12 +49,14 @@ namespace CPL {
     void DrawCircle(glm::vec2 position, float radius, const Color& color);
     void DrawCircleRotated(glm::vec2 position, float radius, float angle, const Color& color);
 
+    void DrawText(glm::vec2 position, float scale, const std::string& text, const Color& color);
+
     inline void ClearBackground(const Color& color) {
         glClearColor(color.r, color.g, color.b, color.a);
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    void BeginDrawShape();
+    void BeginDrawing(const DrawModes& mode);
 
     inline void EndDrawing() {
         glUseProgram(0);
@@ -56,15 +68,18 @@ namespace CPL {
 
     inline double lastTime = 0.0;
     inline int nbFrames = 0;
-    inline void ShowFPS() {
+    inline int FPS = 0;
+    inline void CalculateFPS() {
         const double currentTime = glfwGetTime();
         nbFrames++;
-
         if (currentTime - lastTime >= 1.0) {
-            std::cout << "FPS: " << nbFrames << std::endl;
+            FPS = nbFrames;
             nbFrames = 0;
             lastTime += 1.0;
         }
+    }
+    inline int GetFPS() {
+        return FPS;
     }
     inline float deltaTime = 0;
     inline float lastFrame = 0;
