@@ -25,6 +25,7 @@ namespace CPL {
     class Triangle;
     class Rectangle;
     class Circle;
+    class Line;
 
     struct Character;
     class Text;
@@ -48,6 +49,7 @@ namespace CPL {
     void DrawRectangleRotated(glm::vec2 position, glm::vec2 size, float angle, const Color& color);
     void DrawCircle(glm::vec2 position, float radius, const Color& color);
     void DrawCircleRotated(glm::vec2 position, float radius, float angle, const Color& color);
+    void DrawLine(glm::vec2 startPos, glm::vec2 endPos, const Color& color);
 
     void DrawText(glm::vec2 position, float scale, const std::string& text, const Color& color);
 

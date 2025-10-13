@@ -11,6 +11,9 @@
 #include <filesystem>
 
 #include <ft2build.h>
+
+#include "CPLibrary/2D_Shapes/Line.h"
+
 #include FT_FREETYPE_H
 
 using namespace CPL;
@@ -51,11 +54,13 @@ int main() {
         DrawRectangleRotated({400, 300}, {200, 100}, rotation, RED);
         DrawRectangle(playerPos, {100, 100}, BLUE);
         DrawCircle({400, 100}, 100, WHITE); //Somehow crashes with Text::Init()
+        DrawLine({0, 0}, {SCREEN_WIDTH, SCREEN_HEIGHT}, RED);
+        DrawLine({0, SCREEN_HEIGHT}, {SCREEN_WIDTH, 0}, RED);
 
         BeginDrawing(TEXT);
 
         std::string fpsText = "FPS: " + std::to_string(GetFPS());
-        DrawText({0, 25}, 1, "Hallo, mein name... : cool!?", WHITE);
+        DrawText({0, 25}, 0.6, fpsText, WHITE);
 
         EndDrawing();
 

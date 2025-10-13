@@ -41,7 +41,9 @@ add_executable(OpenGLGame main.cpp
         CPLibrary/Colors.h
         CPLibrary/KeyInputs.h
         CPLibrary/Text.cpp
-        CPLibrary/Text.h)
+        CPLibrary/Text.h
+        CPLibrary/2D_Shapes/Line.cpp
+        CPLibrary/2D_Shapes/Line.h)
 
 # GLM
 target_include_directories(OpenGLGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/glm/glm)

@@ -2,6 +2,7 @@
 #include "2D_Shapes/Triangle.h"
 #include "2D_Shapes/Rectangle.h"
 #include "2D_Shapes/Circle.h"
+#include "2D_Shapes/Line.h"
 #include "Shader.h"
 #include "Text.h"
 
@@ -58,6 +59,11 @@ namespace CPL {
         const auto circle = Circle(position, radius, color);
         circle.rotationAngle = angle;
         circle.Draw(shapeShader);
+    }
+
+    void DrawLine(const glm::vec2 startPos, const glm::vec2 endPos, const Color& color) {
+        const auto line = Line(startPos, endPos, color);
+        line.Draw(shapeShader);
     }
 
     void DrawText(const glm::vec2 position, const float scale, const std::string& text, const Color& color) {
