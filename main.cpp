@@ -50,7 +50,7 @@ int main() {
         const float rotation = GetTime() * 360;
         DrawRectangleRotated({400, 300}, {200, 100}, rotation, RED);
         DrawRectangle(playerPos, {100, 100}, BLUE);
-        //DrawCircle({400, 100}, 100, WHITE); //Somehow crashes with Text::Init()
+        DrawCircle({400, 100}, 100, WHITE); //Somehow crashes with Text::Init()
 
         BeginDrawing(TEXT);
 
