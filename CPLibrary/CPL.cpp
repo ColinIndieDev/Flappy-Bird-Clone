@@ -5,10 +5,12 @@
 #include "2D_Shapes/Line.h"
 #include "Shader.h"
 #include "Text.h"
+#include "2D_Shapes/Texture2D.h"
 
 namespace CPL {
     Shader shapeShader;
     Shader textShader;
+    Shader textureShader;
 
     bool CheckCollisionRects(const Rectangle& one, const Rectangle& two) {
         // X Axis
@@ -24,11 +26,17 @@ namespace CPL {
     void InitShaders() {
         shapeShader = Shader("../CPLibrary/shaders/shader.vert", "../CPLibrary/shaders/shader.frag");
         textShader = Shader("../CPLibrary/shaders/text.vert", "../CPLibrary/shaders/text.frag");
+        textureShader = Shader("../CPLibrary/shaders/texture.vert", "../CPLibrary/shaders/texture.frag");
     }
 
     void BeginDrawing(const DrawModes& mode) {
         if (mode == SHAPE_2D) shapeShader.Use();
-        else if (mode == TEXT) textShader.Use();
+        else if (mode == TEXT) {
+            textShader.Use();
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+        else if (mode == TEXTURE_2D) textureShader.Use();
     }
 
     void DrawTriangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
@@ -64,6 +72,18 @@ namespace CPL {
     void DrawLine(const glm::vec2 startPos, const glm::vec2 endPos, const Color& color) {
         const auto line = Line(startPos, endPos, color);
         line.Draw(shapeShader);
+    }
+
+    void DrawTexture2D(Texture2D* texture, const glm::vec2 position, const Color& color) {
+        texture->position = position;
+        texture->color = color;
+        texture->Draw(textureShader);
+    }
+    void DrawTexture2DRotated(Texture2D* texture, const glm::vec2 position, const float angle, const Color& color) {
+        texture->position = position;
+        texture->color = color;
+        texture->rotationAngle = angle;
+        texture->Draw(textureShader);
     }
 
     void DrawText(const glm::vec2 position, const float scale, const std::string& text, const Color& color) {

@@ -3,7 +3,6 @@ out vec4 FragColor;
 
 uniform vec4 inputColor;
 
-void main()
-{
+void main() {
     FragColor = inputColor / 255.0;
 }

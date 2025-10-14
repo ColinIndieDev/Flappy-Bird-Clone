@@ -26,6 +26,7 @@ namespace CPL {
     class Rectangle;
     class Circle;
     class Line;
+    class Texture2D;
 
     struct Character;
     class Text;
@@ -36,6 +37,7 @@ namespace CPL {
 
     extern Shader shapeShader;
     extern Shader textShader;
+    extern Shader textureShader;
 
     inline GLFWwindow* window;
 
@@ -50,11 +52,13 @@ namespace CPL {
     void DrawCircle(glm::vec2 position, float radius, const Color& color);
     void DrawCircleRotated(glm::vec2 position, float radius, float angle, const Color& color);
     void DrawLine(glm::vec2 startPos, glm::vec2 endPos, const Color& color);
+    void DrawTexture2D(Texture2D* texture, glm::vec2 position, const Color& color);
+    void DrawTexture2DRotated(Texture2D* texture, glm::vec2 position, float angle, const Color& color);
 
     void DrawText(glm::vec2 position, float scale, const std::string& text, const Color& color);
 
     inline void ClearBackground(const Color& color) {
-        glClearColor(color.r, color.g, color.b, color.a);
+        glClearColor(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
@@ -70,7 +74,7 @@ namespace CPL {
 
     inline double lastTime = 0.0;
     inline int nbFrames = 0;
-    inline int FPS = 0;
+    inline int FPS;
     inline void CalculateFPS() {
         const double currentTime = glfwGetTime();
         nbFrames++;
@@ -83,6 +87,7 @@ namespace CPL {
     inline int GetFPS() {
         return FPS;
     }
+
     inline float deltaTime = 0;
     inline float lastFrame = 0;
 

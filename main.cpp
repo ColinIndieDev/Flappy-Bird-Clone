@@ -13,6 +13,7 @@
 #include <ft2build.h>
 
 #include "CPLibrary/2D_Shapes/Line.h"
+#include "CPLibrary/2D_Shapes/Texture2D.h"
 
 #include FT_FREETYPE_H
 
@@ -27,13 +28,13 @@ int main() {
     InitWindow(800, 600, "OpenGL Demo");
     InitShaders();
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // ----- If you want to debug and look how the shapes are made from polygons ----- //
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // ------------------------------------------------------------------------------- //
     Text::Init("../assets/fonts/arial.ttf");
+
+    auto texture = Texture2D("../assets/images/block.jpeg", {100, 100});
+
     while (!WindowShouldClose()) {
         HandleInput();
         CalculateDeltaTime();
@@ -53,9 +54,13 @@ int main() {
         const float rotation = GetTime() * 360;
         DrawRectangleRotated({400, 300}, {200, 100}, rotation, RED);
         DrawRectangle(playerPos, {100, 100}, BLUE);
-        DrawCircle({400, 100}, 100, WHITE); //Somehow crashes with Text::Init()
+        DrawCircle({400, 100}, 100, WHITE);
         DrawLine({0, 0}, {SCREEN_WIDTH, SCREEN_HEIGHT}, RED);
         DrawLine({0, SCREEN_HEIGHT}, {SCREEN_WIDTH, 0}, RED);
+
+        BeginDrawing(TEXTURE_2D);
+
+        DrawTexture2D(&texture, {0, 0}, WHITE);
 
         BeginDrawing(TEXT);
 

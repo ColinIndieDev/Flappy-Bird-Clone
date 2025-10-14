@@ -24,6 +24,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(freetype)
 
+# STB Image
+include(FetchContent)
+FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb.git
+        GIT_TAG master
+)
+FetchContent_MakeAvailable(stb)
+
 # GLAD
 add_subdirectory(external/glad)
 
@@ -43,10 +52,15 @@ add_executable(OpenGLGame main.cpp
         CPLibrary/Text.cpp
         CPLibrary/Text.h
         CPLibrary/2D_Shapes/Line.cpp
-        CPLibrary/2D_Shapes/Line.h)
+        CPLibrary/2D_Shapes/Line.h
+        CPLibrary/2D_Shapes/Texture2D.cpp
+        CPLibrary/2D_Shapes/Texture2D.h)
 
 # GLM
 target_include_directories(OpenGLGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/glm/glm)
+
+# STB Image
+target_include_directories(OpenGLGame PRIVATE ${stb_SOURCE_DIR})
 
 target_link_libraries(OpenGLGame PRIVATE glfw glad freetype)
 
