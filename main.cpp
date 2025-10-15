@@ -1,25 +1,10 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include "CPLibrary/2D_Shapes/Triangle.h"
-#include "CPLibrary/2D_Shapes/Circle.h"
-#include "CPLibrary/2D_Shapes/Rectangle.h"
-#include "CPLibrary/CPL.h"
-#include "CPLibrary/Shader.h"
-#include "CPLibrary/Text.h"
-
-#include <filesystem>
-
-#include <ft2build.h>
-
-#include "CPLibrary/2D_Shapes/Line.h"
-#include "CPLibrary/2D_Shapes/Texture2D.h"
-
-#include FT_FREETYPE_H
+#include "CPLibrary/CPLibrary.h"
 
 using namespace CPL;
 
-// Here ends my framework
+// ----- Prioritize GPUs from NVIDIA or AMD over Intel ----- //
+PRIORITIZE_GPU_BY_VENDOR
+// --------------------------------------------------------- //
 
 auto playerPos = glm::vec2(0, 300);
 void HandleInput();
@@ -31,14 +16,16 @@ int main() {
     // ----- If you want to debug and look how the shapes are made from polygons ----- //
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // ------------------------------------------------------------------------------- //
-    Text::Init("../assets/fonts/arial.ttf");
+    Text::Init("../assets/fonts/determination.ttf");
 
-    auto texture = Texture2D("../assets/images/block.jpeg", {100, 100});
+    const auto texture = Texture2D("../assets/images/block.jpeg", {100, 100});
+    auto skyTexture = Texture2D("../assets/images/sky.jpg", {736 * 1.5, 414 * 1.5});
 
     while (!WindowShouldClose()) {
         HandleInput();
         CalculateDeltaTime();
         CalculateFPS();
+        TimerManager::Update(GetDeltaTime());
 
         // ----- Collision ----- //
         //if (CheckCollisionRects(playerRect, wallRect)) {
@@ -46,26 +33,25 @@ int main() {
         //}
         // --------------------- //
 
+        camera.SetPosition(playerPos);
+
         ClearBackground(BLACK);
 
-        BeginDrawing(SHAPE_2D);
+        BeginDrawing(TEXTURE_2D, false);
 
-        DrawTriangleRotated({200, 200}, {100, 100}, 90, LIME_GREEN);
-        const float rotation = GetTime() * 360;
-        DrawRectangleRotated({400, 300}, {200, 100}, rotation, RED);
-        DrawRectangle(playerPos, {100, 100}, BLUE);
-        DrawCircle({400, 100}, 100, WHITE);
-        DrawLine({0, 0}, {SCREEN_WIDTH, SCREEN_HEIGHT}, RED);
-        DrawLine({0, SCREEN_HEIGHT}, {SCREEN_WIDTH, 0}, RED);
+        DrawTexture2D(&skyTexture, {0, 0}, WHITE);
 
-        BeginDrawing(TEXTURE_2D);
+        BeginDrawing(TEXTURE_2D, true);
 
-        DrawTexture2D(&texture, {0, 0}, WHITE);
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                DrawTex2DCpy(texture, {x * 100, y * 100}, WHITE);
+            }
+        }
 
-        BeginDrawing(TEXT);
+        BeginDrawing(TEXT, false);
 
-        std::string fpsText = "FPS: " + std::to_string(GetFPS());
-        DrawText({0, 25}, 0.6, fpsText, WHITE);
+        ShowDetails();
 
         EndDrawing();
 
@@ -77,10 +63,19 @@ int main() {
 }
 
 void HandleInput() {
-    if (IsKeyDown(GLFW_KEY_ESCAPE)) {
+    if (IsKeyDown(KEY_ESCAPE)) {
         glfwSetWindowShouldClose(window, true);
     }
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsKeyDown(KEY_W)) {
+        playerPos.y -= 100 * GetDeltaTime();
+    }
+    if (IsKeyDown(KEY_S)) {
+        playerPos.y += 100 * GetDeltaTime();
+    }
+    if (IsKeyDown(KEY_A)) {
+        playerPos.x -= 100 * GetDeltaTime();
+    }
+    if (IsKeyDown(KEY_D)) {
         playerPos.x += 100 * GetDeltaTime();
     }
 }

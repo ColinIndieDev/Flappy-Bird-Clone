@@ -11,7 +11,7 @@ namespace CPL {
             0.0f, 0.0f, 0.0f // Center
         };
 
-        constexpr int segments = 100;
+        const int segments = std::ceil(radius);
         for (int i = 0; i <= segments; i++) {
             const float theta = 2 * static_cast<float>(M_PI)  / static_cast<float>(segments) * static_cast<float>(i);
             float x = 0.0f + radius * std::cos(theta);
@@ -45,7 +45,6 @@ namespace CPL {
         transform = glm::translate(transform, glm::vec3(-center, 0.0f));
 
         shader.SetMatrix4fv("transform", transform);
-        shader.SetMatrix4fv("projection", projection);
         shader.SetVector3f("offset", glm::vec3(position, 0.0f));
         shader.SetColor("inputColor", color);
         glBindVertexArray(VAO);

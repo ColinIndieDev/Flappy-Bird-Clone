@@ -39,22 +39,27 @@ add_subdirectory(external/glad)
 add_executable(OpenGLGame main.cpp
         CPLibrary/Shader.cpp
         CPLibrary/Shader.h
-        CPLibrary/2D_Shapes/Triangle.cpp
-        CPLibrary/2D_Shapes/Triangle.h
+        CPLibrary/shapes2D/Triangle.cpp
+        CPLibrary/shapes2D/Triangle.h
         CPLibrary/CPL.h
         CPLibrary/CPL.cpp
-        CPLibrary/2D_Shapes/Rectangle.cpp
-        CPLibrary/2D_Shapes/Rectangle.h
-        CPLibrary/2D_Shapes/Circle.cpp
-        CPLibrary/2D_Shapes/Circle.h
+        CPLibrary/shapes2D/Rectangle.cpp
+        CPLibrary/shapes2D/Rectangle.h
+        CPLibrary/shapes2D/Circle.cpp
+        CPLibrary/shapes2D/Circle.h
         CPLibrary/Colors.h
         CPLibrary/KeyInputs.h
         CPLibrary/Text.cpp
         CPLibrary/Text.h
-        CPLibrary/2D_Shapes/Line.cpp
-        CPLibrary/2D_Shapes/Line.h
-        CPLibrary/2D_Shapes/Texture2D.cpp
-        CPLibrary/2D_Shapes/Texture2D.h)
+        CPLibrary/shapes2D/Line.cpp
+        CPLibrary/shapes2D/Line.h
+        CPLibrary/shapes2D/Texture2D.cpp
+        CPLibrary/shapes2D/Texture2D.h
+        CPLibrary/timers/Timer.h
+        CPLibrary/timers/TimerManager.cpp
+        CPLibrary/timers/TimerManager.h
+        CPLibrary/CPLibrary.h
+)
 
 # GLM
 target_include_directories(OpenGLGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/glm/glm)

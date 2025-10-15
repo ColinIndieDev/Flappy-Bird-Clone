@@ -1,16 +1,37 @@
 #include "CPL.h"
-#include "2D_Shapes/Triangle.h"
-#include "2D_Shapes/Rectangle.h"
-#include "2D_Shapes/Circle.h"
-#include "2D_Shapes/Line.h"
+#include "shapes2D/Triangle.h"
+#include "shapes2D/Rectangle.h"
+#include "shapes2D/Circle.h"
+#include "shapes2D/Line.h"
 #include "Shader.h"
 #include "Text.h"
-#include "2D_Shapes/Texture2D.h"
+#include "shapes2D/Texture2D.h"
 
 namespace CPL {
     Shader shapeShader;
     Shader textShader;
     Shader textureShader;
+
+    void ShowDetails() {
+        const GLubyte* renderer = glGetString(GL_RENDERER);
+        const GLubyte* vendor = glGetString(GL_VENDOR);
+        const GLubyte* version = glGetString(GL_VERSION);
+        const std::string rendererString(reinterpret_cast<const char*>(renderer));
+        const std::string vendorString(reinterpret_cast<const char*>(vendor));
+        const std::string versionString(reinterpret_cast<const char*>(version));
+
+        BeginDrawing(TEXT, false);
+        const std::string fpsText = "FPS: " + std::to_string(GetFPS());
+        DrawText({0, 25}, 0.3, fpsText, WHITE);
+        const std::string vendorText = "Vendor: " + vendorString;
+        DrawText({0, 60}, 0.3, vendorText, WHITE);
+        const std::string rendererText = "GPU: " + rendererString;
+        DrawText({0, 95}, 0.3, rendererText, WHITE);
+        const std::string versionText = "Version: " + versionString;
+        DrawText({0, 130}, 0.3, versionText, WHITE);
+        EndDrawing();
+    }
+
 
     bool CheckCollisionRects(const Rectangle& one, const Rectangle& two) {
         // X Axis
@@ -29,14 +50,20 @@ namespace CPL {
         textureShader = Shader("../CPLibrary/shaders/texture.vert", "../CPLibrary/shaders/texture.frag");
     }
 
-    void BeginDrawing(const DrawModes& mode) {
-        if (mode == SHAPE_2D) shapeShader.Use();
+    void BeginDrawing(const DrawModes& mode, const bool mode2D) {
+        Shader shader{};
+        if (mode == SHAPE_2D) shader = shapeShader;
         else if (mode == TEXT) {
-            textShader.Use();
+            shader = textShader;
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
-        else if (mode == TEXTURE_2D) textureShader.Use();
+        else if (mode == TEXTURE_2D) shader = textureShader;
+
+        shader.Use();
+        const glm::mat4 view = camera.GetViewMatrix();
+        const glm::mat4 viewProjection = projection * view;
+        shader.SetMatrix4fv("projection", mode2D ? viewProjection : projection);
     }
 
     void DrawTriangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
@@ -84,6 +111,11 @@ namespace CPL {
         texture->color = color;
         texture->rotationAngle = angle;
         texture->Draw(textureShader);
+    }
+    void DrawTex2DCpy(Texture2D texture, const glm::vec2 position, const Color& color) {
+        texture.position = position;
+        texture.color = color;
+        texture.Draw(textureShader);
     }
 
     void DrawText(const glm::vec2 position, const float scale, const std::string& text, const Color& color) {

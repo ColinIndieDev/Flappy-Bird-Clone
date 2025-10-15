@@ -23,7 +23,6 @@ namespace CPL {
     void Line::Draw(const Shader& shader) const {
         shader.SetMatrix4fv("transform", glm::mat4(1.0f));
         shader.SetVector3f("offset", glm::vec3(0.0f));
-        shader.SetMatrix4fv("projection", projection);
         shader.SetColor("inputColor", color);
         glBindVertexArray(VAO);
         glDrawArrays(GL_LINES, 0, 2);

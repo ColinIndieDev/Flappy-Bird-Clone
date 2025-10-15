@@ -7,11 +7,11 @@
 namespace CPL {
     Texture2D::Texture2D(const std::string& filePath, const glm::vec2 position, const glm::vec2 size, const Color& color) : position(position), size(size), color(color) {
         const float vertices[] = {
-            // positions                                                               // texture coords
-            static_cast<float>(size.x), 0.0f, 0.0f,                               1.0f, 1.0f, // top right
+            // positions                                                    // texture coords
+            static_cast<float>(size.x), 0.0f, 0.0f,                         1.0f, 1.0f, // top right
             static_cast<float>(size.x), static_cast<float>(size.y), 0.0f,   1.0f, 0.0f, // bottom right
-            0.0f, static_cast<float>(size.y), 0.0f,                              0.0f, 0.0f, // bottom left
-            0.0f, 0.0f, 0.0f,                                                         0.0f, 1.0f  // top left
+            0.0f, static_cast<float>(size.y), 0.0f,                         0.0f, 0.0f, // bottom left
+            0.0f, 0.0f, 0.0f,                                               0.0f, 1.0f  // top left
         };
         constexpr unsigned int indices[] = {
             0, 1, 3,
@@ -115,7 +115,6 @@ namespace CPL {
         transform = glm::translate(transform, glm::vec3(-center, 0.0f));
 
         shader.SetMatrix4fv("transform", transform);
-        shader.SetMatrix4fv("projection", projection);
         shader.SetVector3f("offset", glm::vec3(position, 0.0f));
         shader.SetColor("inputColor", color);
 

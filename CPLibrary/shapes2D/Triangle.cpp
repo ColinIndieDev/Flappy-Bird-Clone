@@ -32,8 +32,6 @@ namespace CPL {
         transform = glm::translate(transform, glm::vec3(-center, 0.0f));
 
         shader.SetMatrix4fv("transform", transform);
-
-        shader.SetMatrix4fv("projection", projection);
         shader.SetVector3f("offset", glm::vec3(position, 0)); // Z not required for 2D shape
         shader.SetColor("inputColor", color);
         glBindVertexArray(VAO);

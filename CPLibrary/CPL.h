@@ -10,6 +10,8 @@
 #include "Colors.h"
 #include "KeyInputs.h"
 
+#define PRIORITIZE_GPU_BY_VENDOR extern "C" { __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001; __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1; }
+
 namespace CPL {
     enum DrawModes {
         SHAPE_2D,
@@ -20,6 +22,9 @@ namespace CPL {
     struct Color {
         float r, g, b, a;
     };
+
+    struct Timer;
+    class TimerManager;
 
     class Shader;
     class Triangle;
@@ -41,6 +46,31 @@ namespace CPL {
 
     inline GLFWwindow* window;
 
+    struct Camera2D {
+        float zoom = 1.0f;
+        float rotation = 0.0f;
+
+        void Init() {
+            position = {-static_cast<float>(SCREEN_WIDTH) / 2.0f, -static_cast<float>(SCREEN_HEIGHT) / 2.0f};
+        }
+
+        void SetPosition(const glm::vec2 position) {
+            this->position = position - glm::vec2(static_cast<float>(SCREEN_WIDTH) / 2.0f, static_cast<float>(SCREEN_HEIGHT) / 2.0f);
+        }
+
+        [[nodiscard]] glm::mat4 GetViewMatrix() const {
+            auto view = glm::mat4(1.0f);
+            view = glm::translate(view, glm::vec3(-position, 0.0f));
+            view  = glm::scale(view, glm::vec3(zoom, zoom, 1.0f));
+            view = glm::rotate(view, glm::radians(rotation), glm::vec3(0, 0, 1));
+            return view;
+        }
+    private:
+        glm::vec2 position{0.0f};
+    };
+
+    inline Camera2D camera;
+
     bool CheckCollisionRects(const Rectangle &one, const Rectangle &two);
 
     void InitShaders();
@@ -54,6 +84,7 @@ namespace CPL {
     void DrawLine(glm::vec2 startPos, glm::vec2 endPos, const Color& color);
     void DrawTexture2D(Texture2D* texture, glm::vec2 position, const Color& color);
     void DrawTexture2DRotated(Texture2D* texture, glm::vec2 position, float angle, const Color& color);
+    void DrawTex2DCpy(Texture2D texture, glm::vec2 position, const Color& color);
 
     void DrawText(glm::vec2 position, float scale, const std::string& text, const Color& color);
 
@@ -62,7 +93,7 @@ namespace CPL {
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    void BeginDrawing(const DrawModes& mode);
+    void BeginDrawing(const DrawModes& mode, bool mode2D);
 
     inline void EndDrawing() {
         glUseProgram(0);
@@ -99,6 +130,8 @@ namespace CPL {
 
     inline float GetDeltaTime() { return deltaTime; }
     inline float GetTime() { return static_cast<float>(glfwGetTime()); }
+
+    void ShowDetails();
 
     inline void InitWindow(const int width, const int height, const char* title) {
         glfwInit();
