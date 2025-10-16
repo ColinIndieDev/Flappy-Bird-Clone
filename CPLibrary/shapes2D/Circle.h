@@ -16,8 +16,10 @@ namespace CPL {
 
         explicit Circle(glm::vec2 pos, float radius, Color color);
         void Draw(const Shader& shader) const;
+        void DrawOutline(const Shader& shader) const;
     private:
         unsigned int VBO{}, VAO{};
+        unsigned int outlineVBO{}, outlineVAO{};
         int vertexCount = 0;
     };
 }

@@ -7,6 +7,7 @@
 #include <gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <random>
 #include "Colors.h"
 #include "KeyInputs.h"
 
@@ -44,6 +45,8 @@ namespace CPL {
     extern Shader textShader;
     extern Shader textureShader;
 
+    inline std::mt19937 gen{std::random_device{}()};
+
     inline GLFWwindow* window;
 
     struct Camera2D {
@@ -77,16 +80,21 @@ namespace CPL {
 
     void DrawTriangle(glm::vec2 position, glm::vec2 size, const Color& color);
     void DrawTriangleRotated(glm::vec2 position, glm::vec2 size, float angle, const Color& color);
+    void DrawTriangleOutline(glm::vec2 position, glm::vec2 size, const Color& color);
+    void DrawTriangleRotOut(glm::vec2 position, glm::vec2 size, float angle, const Color& color);
     void DrawRectangle(glm::vec2 position, glm::vec2 size, const Color& color);
     void DrawRectangleRotated(glm::vec2 position, glm::vec2 size, float angle, const Color& color);
+    void DrawRectangleOutline(glm::vec2 position, glm::vec2 size, const Color& color);
+    void DrawRectangleRotOut(glm::vec2 position, glm::vec2 size, float angle, const Color& color);
     void DrawCircle(glm::vec2 position, float radius, const Color& color);
-    void DrawCircleRotated(glm::vec2 position, float radius, float angle, const Color& color);
+    void DrawCircleOutline(glm::vec2 position, float radius, const Color& color);
     void DrawLine(glm::vec2 startPos, glm::vec2 endPos, const Color& color);
     void DrawTexture2D(Texture2D* texture, glm::vec2 position, const Color& color);
     void DrawTexture2DRotated(Texture2D* texture, glm::vec2 position, float angle, const Color& color);
     void DrawTex2DCpy(Texture2D texture, glm::vec2 position, const Color& color);
 
     void DrawText(glm::vec2 position, float scale, const std::string& text, const Color& color);
+    void DrawTextShadow(glm::vec2 position, glm::vec2 shadowOffset, float scale, const std::string& text, const Color& color, const Color& shadowColor);
 
     inline void ClearBackground(const Color& color) {
         glClearColor(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
@@ -133,36 +141,29 @@ namespace CPL {
 
     void ShowDetails();
 
-    inline void InitWindow(const int width, const int height, const char* title) {
-        glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-        SCREEN_WIDTH = width;
-        SCREEN_HEIGHT = height;
-        projection = glm::ortho(
-            0.0f, static_cast<float>(width),
-            static_cast<float>(height), 0.0f,
-            -1.0f, 1.0f
-        );
-
-        window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-        if (window == nullptr) {
-            std::cout << "Failed to create GLFW window" << std::endl;
-            glfwTerminate();
-            exit(-1);
-        }
-        glfwMakeContextCurrent(window);
-        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-            std::cout << "Failed to initialize GLAD" << std::endl;
-            exit(-1);
-        }
-    }
+    void InitWindow(int width, int height, const char* title);
 
     inline int WindowShouldClose() {
         return glfwWindowShouldClose(window);
+    }
+
+    inline int RandInt(const int min, const int max) {
+        std::uniform_int_distribution dist(min, max);
+        return dist(gen);
+    }
+    inline float RandFloat(const float min, const float max) {
+        std::uniform_real_distribution dist(min, max);
+        return dist(gen);
+    }
+    inline bool RandByPercentInt(const int percent)
+    {
+        std::uniform_int_distribution dist(1, 100);
+        return dist(gen) <= percent;
+    }
+    inline bool RandByPercentFloat(const float percent)
+    {
+        std::uniform_real_distribution dist(0.0f, 100.0f);
+        return dist(gen) <= percent;
     }
 
     inline int IsKeyDown(const int keycode) {

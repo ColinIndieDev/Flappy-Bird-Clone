@@ -15,7 +15,7 @@ namespace CPL {
         mutable float rotationAngle = 0.0f;
 
         explicit Triangle(glm::vec2 pos, glm::vec2 size, Color color);
-        void Draw(const Shader& shader) const;
+        void Draw(const Shader& shader, bool filled) const;
     private:
         unsigned int VBO{}, VAO{};
     };

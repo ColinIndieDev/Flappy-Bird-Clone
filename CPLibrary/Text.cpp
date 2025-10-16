@@ -7,11 +7,12 @@
 #include FT_FREETYPE_H
 
 namespace CPL {
-    std::map<GLchar, Character> Text::Characters;
+    std::string Text::currentFont;
+    std::map<std::string, std::map<GLchar, Character>> Text::Fonts;
     unsigned int Text::VAO;
     unsigned int Text::VBO;
 
-    void Text::Init(const std::string& fontPath) {
+    void Text::Init(const std::string& fontPath, const std::string& fontName) {
         // ----- Freetype ----- //
         FT_Library ft;
         if (FT_Init_FreeType(&ft)) {
@@ -19,8 +20,8 @@ namespace CPL {
             exit(-1);
         }
 
-        if (const std::string fontName = std::filesystem::path(fontPath).string();
-            fontName.empty()) {
+        if (const std::string font_name = std::filesystem::path(fontPath).string();
+            font_name.empty()) {
             std::cout << "ERROR::FREETYPE: Failed to load fontName" << std::endl;
             exit(-1);
         }
@@ -33,6 +34,7 @@ namespace CPL {
         FT_Set_Pixel_Sizes(face, 0, 48);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+        std::map<GLchar, Character> characters;
         for (unsigned char c = 0; c < 128; c++) {
             if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
                 std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
@@ -65,9 +67,12 @@ namespace CPL {
                 glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
                 static_cast<unsigned int>(face->glyph->advance.x)
             };
-            Characters.insert(std::pair<char, Character>(c, character));
+            characters.insert(std::pair<char, Character>(c, character));
         }
+        Fonts.insert(std::pair(fontName, characters));
+        currentFont = fontName;
         glBindTexture(GL_TEXTURE_2D, 0);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         // ----- VAO & VBO ----- //
         glGenVertexArrays(1, &VAO);
@@ -84,6 +89,10 @@ namespace CPL {
         FT_Done_FreeType(ft);
     }
 
+    void Text::Use(const std::string& fontName) {
+        currentFont = fontName;
+    }
+
     void Text::DrawText(const Shader& shader, const std::string& text, glm::vec2 pos, const float scale, const Color& color) {
         const glm::mat4 textProjection = glm::ortho(
          0.0f, static_cast<float>(SCREEN_WIDTH),
@@ -95,7 +104,7 @@ namespace CPL {
         glBindVertexArray(VAO);
 
         for (char c : text) {
-            const auto [TextureID, Size, Bearing, Advance] = Characters.at(c);
+            const auto [TextureID, Size, Bearing, Advance] = Fonts[currentFont].at(c);
 
             const float xPos = pos.x + static_cast<float>(Bearing.x) * scale;
             const float yPos = pos.y - static_cast<float>((Size.y - Bearing.y)) * scale;

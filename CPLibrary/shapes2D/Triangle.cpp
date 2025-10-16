@@ -24,7 +24,7 @@ namespace CPL {
         glBindVertexArray(0);
     }
 
-    void Triangle::Draw(const Shader& shader) const {
+    void Triangle::Draw(const Shader& shader, const bool filled) const {
         auto transform = glm::mat4(1.0f);
         const glm::vec2 center = {position.x + size.x / 2, position.y + size.y / 2};
         transform = glm::translate(transform, glm::vec3(center, 0.0f));
@@ -35,7 +35,8 @@ namespace CPL {
         shader.SetVector3f("offset", glm::vec3(position, 0)); // Z not required for 2D shape
         shader.SetColor("inputColor", color);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        if (filled) glDrawArrays(GL_TRIANGLES, 0, 3);
+        else glDrawArrays(GL_LINE_LOOP, 0, 3);
         glBindVertexArray(0);
     }
 }

@@ -22,13 +22,13 @@ namespace CPL {
 
         BeginDrawing(TEXT, false);
         const std::string fpsText = "FPS: " + std::to_string(GetFPS());
-        DrawText({0, 25}, 0.3, fpsText, WHITE);
+        DrawTextShadow({0, 25}, {2, 2}, 0.3, fpsText, WHITE, DARK_GRAY);
         const std::string vendorText = "Vendor: " + vendorString;
-        DrawText({0, 60}, 0.3, vendorText, WHITE);
+        DrawTextShadow({0, 60}, {2, 2}, 0.3, vendorText, WHITE, DARK_GRAY);
         const std::string rendererText = "GPU: " + rendererString;
-        DrawText({0, 95}, 0.3, rendererText, WHITE);
+        DrawTextShadow({0, 95}, {2, 2}, 0.3, rendererText, WHITE, DARK_GRAY);
         const std::string versionText = "Version: " + versionString;
-        DrawText({0, 130}, 0.3, versionText, WHITE);
+        DrawTextShadow({0, 130}, {2, 2}, 0.3, versionText, WHITE, DARK_GRAY);
         EndDrawing();
     }
 
@@ -42,6 +42,39 @@ namespace CPL {
             two.position.y + two.size.y >= one.position.y;
 
         return collisionX && collisionY;
+    }
+
+    void InitWindow(const int width, const int height, const char* title) {
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        SCREEN_WIDTH = width;
+        SCREEN_HEIGHT = height;
+        projection = glm::ortho(
+            0.0f, static_cast<float>(width),
+            static_cast<float>(height), 0.0f,
+            -1.0f, 1.0f
+        );
+
+        window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+        if (window == nullptr) {
+            std::cout << "Failed to create GLFW window" << std::endl;
+            glfwTerminate();
+            exit(-1);
+        }
+        glfwMakeContextCurrent(window);
+        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+            std::cout << "Failed to initialize GLAD" << std::endl;
+            exit(-1);
+        }
+
+        InitShaders();
+
+        // ----- For the font & 2D textures ----- //
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     }
 
     void InitShaders() {
@@ -68,32 +101,50 @@ namespace CPL {
 
     void DrawTriangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
         const auto triangle = Triangle(position, size, color);
-        triangle.Draw(shapeShader);
+        triangle.Draw(shapeShader, true);
     }
     void DrawTriangleRotated(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
         const auto triangle = Triangle(position, size, color);
         triangle.rotationAngle = angle;
-        triangle.Draw(shapeShader);
+        triangle.Draw(shapeShader, true);
     }
+    void DrawTriangleOutline(const glm::vec2 position, const glm::vec2 size, const Color& color) {
+        const auto triangle = Triangle(position, size, color);
+        triangle.Draw(shapeShader, false);
+    }
+    void DrawTriangleRotOut(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
+        const auto triangle = Triangle(position, size, color);
+        triangle.rotationAngle = angle;
+        triangle.Draw(shapeShader, false);
+    }
+
 
     void DrawRectangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
         const auto rectangle = Rectangle(position, size, color);
-        rectangle.Draw(shapeShader);
+        rectangle.Draw(shapeShader, true);
     }
     void DrawRectangleRotated(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
         const auto rectangle = Rectangle(position, size, color);
         rectangle.rotationAngle = angle;
-        rectangle.Draw(shapeShader);
+        rectangle.Draw(shapeShader, true);
+    }
+    void DrawRectangleOutline(const glm::vec2 position, const glm::vec2 size, const Color& color) {
+        const auto rectangle = Rectangle(position, size, color);
+        rectangle.Draw(shapeShader, false);
+    }
+    void DrawRectangleRotOut(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
+        const auto rectangle = Rectangle(position, size, color);
+        rectangle.rotationAngle = angle;
+        rectangle.Draw(shapeShader, false);
     }
 
     void DrawCircle(const glm::vec2 position, const float radius, const Color& color) {
         const auto circle = Circle(position, radius, color);
         circle.Draw(shapeShader);
     }
-    void DrawCircleRotated(const glm::vec2 position, const float radius, const float angle, const Color& color) {
+    void DrawCircleOutline(const glm::vec2 position, const float radius, const Color& color) {
         const auto circle = Circle(position, radius, color);
-        circle.rotationAngle = angle;
-        circle.Draw(shapeShader);
+        circle.DrawOutline(shapeShader);
     }
 
     void DrawLine(const glm::vec2 startPos, const glm::vec2 endPos, const Color& color) {
@@ -119,6 +170,12 @@ namespace CPL {
     }
 
     void DrawText(const glm::vec2 position, const float scale, const std::string& text, const Color& color) {
+        if (Text::Fonts.empty()) Text::Init("../assets/fonts/determination.ttf", "defaultFont");
+        Text::DrawText(textShader, text, position, scale, color);
+    }
+    void DrawTextShadow(const glm::vec2 position, const glm::vec2 shadowOffset, const float scale, const std::string& text, const Color& color, const Color& shadowColor) {
+        if (Text::Fonts.empty()) Text::Init("../assets/fonts/determination.ttf", "defaultFont");
+        Text::DrawText(textShader, text, {position.x + shadowOffset.x, position.y - shadowOffset.y}, scale, shadowColor);
         Text::DrawText(textShader, text, position, scale, color);
     }
 

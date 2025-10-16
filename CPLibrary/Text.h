@@ -16,10 +16,13 @@ namespace CPL {
 
     class Text {
     public:
-        static void Init(const std::string& fontPath);
+        static std::map<std::string, std::map<GLchar, Character>> Fonts;
+
+        static void Init(const std::string& fontPath, const std::string& fontName);
+        static void Use(const std::string& fontName);
         static void DrawText(const Shader& shader, const std::string& text, glm::vec2 pos, float scale, const Color& color);
     private:
-        static std::map<GLchar, Character> Characters;
         static unsigned int VAO, VBO;
+        static std::string currentFont;
     };
 }
