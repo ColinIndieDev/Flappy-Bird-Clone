@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "../CPLibrary/Audio.h"
 #include "../CPLibrary/shapes2D/Triangle.h"
 #include "../CPLibrary/shapes2D/Circle.h"
 #include "../CPLibrary/shapes2D/Rectangle.h"

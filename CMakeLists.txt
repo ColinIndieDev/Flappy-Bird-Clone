@@ -38,6 +38,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(stb)
 
+# Miniaudio
+set(MINIAUDIO_PATH "${CMAKE_BINARY_DIR}/_deps/miniaudio/miniaudio.h")
+file(DOWNLOAD
+        https://raw.githubusercontent.com/mackron/miniaudio/master/miniaudio.h
+        ${MINIAUDIO_PATH}
+        SHOW_PROGRESS
+)
+add_library(miniaudio INTERFACE)
+target_include_directories(miniaudio INTERFACE "${CMAKE_BINARY_DIR}/_deps/miniaudio")
+
 # GLAD
 add_subdirectory(external/glad)
 
@@ -65,6 +75,8 @@ add_executable(OpenGLGame main.cpp
         CPLibrary/timers/TimerManager.h
         CPLibrary/CPLibrary.h
         CPLibrary/Logging.h
+        CPLibrary/Audio.cpp
+        CPLibrary/Audio.h
 )
 
 # GLM
@@ -73,7 +85,7 @@ target_include_directories(OpenGLGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/extern
 # STB Image
 target_include_directories(OpenGLGame PRIVATE ${stb_SOURCE_DIR})
 
-target_link_libraries(OpenGLGame PRIVATE glfw glad freetype)
+target_link_libraries(OpenGLGame PRIVATE glfw glad freetype miniaudio)
 
 if (WIN32)
     target_link_libraries(OpenGLGame PRIVATE opengl32)

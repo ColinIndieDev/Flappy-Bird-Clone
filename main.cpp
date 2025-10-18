@@ -1,5 +1,4 @@
 #include "CPLibrary/CPLibrary.h"
-#include "CPLibrary/Logging.h"
 using namespace CPL;
 
 // ----- Prioritize GPUs from NVIDIA or AMD over Intel ----- //
@@ -60,20 +59,20 @@ public:
     static void Menu() {
         const std::string title = "Flappy Bird";
         const float textWidth = Text::GetTextSize("defaultFont", title, 2).x;
-        DrawTextShadow({SCREEN_WIDTH / 2 - textWidth / 2, SCREEN_HEIGHT - 48 * 3},{5, 5}, 2, title, WHITE, DARK_GRAY);
+        DrawTextShadow({static_cast<float>(SCREEN_WIDTH) / 2 - textWidth / 2, SCREEN_HEIGHT - 48 * 3},{5, 5}, 2, title, WHITE, DARK_GRAY);
 
         const std::string info = "Press [SPACE] to start";
         const float textWidthInfo = Text::GetTextSize("defaultFont", info, 0.5).x;
-        DrawTextShadow({SCREEN_WIDTH / 2 - textWidthInfo / 2, SCREEN_HEIGHT / 4},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
+        DrawTextShadow({static_cast<float>(SCREEN_WIDTH) / 2 - textWidthInfo / 2, SCREEN_HEIGHT / 4},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
     }
     static void GameOver() {
         const std::string title = "Game Over";
         const float textWidth = Text::GetTextSize("defaultFont", title, 2).x;
-        DrawTextShadow({SCREEN_WIDTH / 2 - textWidth / 2, SCREEN_HEIGHT - 48 * 3},{5, 5}, 2, title, WHITE, DARK_GRAY);
+        DrawTextShadow({static_cast<float>(SCREEN_WIDTH) / 2 - textWidth / 2, SCREEN_HEIGHT - 48 * 3},{5, 5}, 2, title, WHITE, DARK_GRAY);
 
         const std::string info = "Press [SPACE] to restart";
         const float textWidthInfo = Text::GetTextSize("defaultFont", info, 0.5).x;
-        DrawTextShadow({SCREEN_WIDTH / 2 - textWidthInfo / 2, SCREEN_HEIGHT / 4},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
+        DrawTextShadow({static_cast<float>(SCREEN_WIDTH) / 2 - textWidthInfo / 2, SCREEN_HEIGHT / 4},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
     }
 };
 
@@ -95,10 +94,11 @@ void RemovePipe() {
 
 int main() {
     InitWindow(800, 600, "Flappy Bird OpenGL");
+    AudioManager::Init();
 
     auto skyTexture = Texture2D("../assets/images/background.jpg", {736 * 1.5, 414 * 1.5});
     auto birdTexture = Texture2D("../assets/images/bird.png", {100, 100});
-    auto pipeTexture = Texture2D("../assets/images/pipe.png", {100, 500});
+    auto pipeTexture = Texture2D("../assets/images/pipe2.png", {100, 500});
     Bird player{};
     player.position = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
     camera.position = glm::vec2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
@@ -126,18 +126,12 @@ int main() {
         }
         RemovePipe();
 
-        float playerOffset = 5.0f;
-        Rectangle playerRect(player.position - glm::vec2{birdTexture.textureSize.x / 4, birdTexture.textureSize.y / 4} + glm::vec2(playerOffset),
-            glm::vec2{birdTexture.textureSize.x / 2, birdTexture.textureSize.y / 2} - glm::vec2(playerOffset * 2), WHITE);
+        Circle playerCircle(player.position, birdTexture.textureSize.x / 4 - 4, WHITE);
         for (auto& pipe : pipes) {
             if (!gameOver) pipe.Update();
-
             Rectangle upperPipeRect(pipe.position, pipe.size, WHITE);
             Rectangle lowerPipeRect(pipe.position - glm::vec2(0, pipe.size.y + 150), pipe.size, WHITE);
-            if (CheckCollisionRects(playerRect, upperPipeRect)) {
-                gameOver = true;
-            }
-            else if (CheckCollisionRects(playerRect, lowerPipeRect)) {
+            if (CheckCollisionCircleRect(playerCircle, upperPipeRect) || CheckCollisionCircleRect(playerCircle, lowerPipeRect)) {
                 gameOver = true;
             }
         }
@@ -150,29 +144,23 @@ int main() {
 
         ClearBackground(BLACK);
         BeginDrawing(TEXTURE_2D, false);
-
         for (auto& position : background.skyPositions) {
             DrawTexture2D(&skyTexture, position, WHITE);
         }
-
-        BeginDrawing(TEXTURE_2D, true);
         const glm::vec2 offset = {birdTexture.textureSize.x / 2, birdTexture.textureSize.y / 2};
         DrawTexture2DRotated(&birdTexture, player.position - offset, player.rotation, WHITE);
-
         for (const auto& pipe : pipes) {
-            DrawTexture2DRotated(&pipeTexture, pipe.position - glm::vec2(0, pipe.size.y + 145), 0, WHITE);
-            DrawTexture2DRotated(&pipeTexture, pipe.position - glm::vec2(0, 0), 180, WHITE);
+            DrawTexture2DRotated(&pipeTexture, pipe.position - glm::vec2(0, pipe.size.y + 145), 180, WHITE);
+            DrawTexture2DRotated(&pipeTexture, pipe.position - glm::vec2(0, 0), 0, WHITE);
         }
 
         BeginDrawing(SHAPE_2D, false);
         if (gameOver) DrawRectangle({0, 0}, {SCREEN_WIDTH, SCREEN_HEIGHT}, Color{0, 0, 0, 150});
 
         BeginDrawing(TEXT, false);
-
         if (!gameOver && player.isFalling) score += 1 * GetDeltaTime();
         float textWidth = Text::GetTextSize("defaultFont", std::to_string(static_cast<int>(std::floor(score))), 1).x;
-        if (player.isFalling) DrawTextShadow({SCREEN_WIDTH / 2 - textWidth / 2, SCREEN_HEIGHT - 48},{5, 5}, 1, std::to_string(static_cast<int>(std::floor(score))), WHITE, DARK_GRAY);
-
+        if (player.isFalling) DrawTextShadow({static_cast<float>(SCREEN_WIDTH) / 2 - textWidth / 2, SCREEN_HEIGHT - 48},{5, 5}, 1, std::to_string(static_cast<int>(std::floor(score))), WHITE, DARK_GRAY);
         if (!player.isFalling) UI::Menu();
         if (gameOver) UI::GameOver();
         ShowDetails();
@@ -183,6 +171,7 @@ int main() {
         glfwPollEvents();
     }
     CloseWindow();
+    AudioManager::Close();
 }
 
 void HandleInput(Bird& player) {
@@ -192,6 +181,7 @@ void HandleInput(Bird& player) {
     if (IsKeyPressedOnce(KEY_SPACE)) {
         if (!player.isFalling) player.isFalling = true;
         player.velocity = -player.jumpForce;
+        AudioManager::PlaySFX("../assets/sounds/jump.mp3");
     }
     if (IsKeyPressedOnce(KEY_SPACE) && gameOver) {
         gameOver = false;

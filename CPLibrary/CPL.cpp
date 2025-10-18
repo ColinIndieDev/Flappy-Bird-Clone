@@ -34,14 +34,23 @@ namespace CPL {
 
 
     bool CheckCollisionRects(const Rectangle& one, const Rectangle& two) {
-        // X Axis
         const bool collisionX = one.position.x + one.size.x >= two.position.x &&
             two.position.x + two.size.x >= one.position.x;
-        // Y Axis
         const bool collisionY = one.position.y + one.size.y >= two.position.y &&
             two.position.y + two.size.y >= one.position.y;
 
         return collisionX && collisionY;
+    }
+    bool CheckCollisionCircleRect(const Circle& one, const Rectangle& two) {
+        const glm::vec2 circleCenter = one.position;
+        const glm::vec2 rectCenter = two.position + two.size * 0.5f;
+        const glm::vec2 halfExtents = two.size * 0.5f;
+        const glm::vec2 difference = circleCenter - rectCenter;
+        const glm::vec2 clamped = glm::clamp(difference, -halfExtents, halfExtents);
+        const glm::vec2 closest = rectCenter + clamped;
+        const glm::vec2 delta = closest - circleCenter;
+
+        return glm::length(delta) <= one.radius;
     }
 
     void InitWindow(const int width, const int height, const char* title) {
