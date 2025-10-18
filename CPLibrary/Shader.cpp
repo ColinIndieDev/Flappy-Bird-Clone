@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "CPL.h"
+#include "Logging.h"
 
 #include <fstream>
 #include <sstream>
@@ -26,7 +27,7 @@ namespace CPL {
             fragmentCode = fShaderStream.str();
         }
         catch (std::ifstream::failure& e) {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
+            Logging::Log(2, "File not successfully read: " + std::string(e.what()));
         }
         const char* vShaderCode = vertexCode.c_str();
         const char* fShaderCode = fragmentCode.c_str();
@@ -88,14 +89,14 @@ namespace CPL {
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
             if (!success) {
                 glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << std::endl;
+                Logging::Log(2, "Shader compilation error: " + type + "\n" + std::string(infoLog));
             }
         }
         else {
             glGetProgramiv(shader, GL_LINK_STATUS, &success);
             if (!success) {
                 glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << std::endl;
+                Logging::Log(2, "Program linking error of type: " + type + "\n" + std::string(infoLog));
             }
         }
     }

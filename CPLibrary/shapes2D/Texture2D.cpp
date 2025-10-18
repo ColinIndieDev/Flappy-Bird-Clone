@@ -5,7 +5,7 @@
 #include <stb_image.h>
 
 namespace CPL {
-    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 position, const glm::vec2 size, const Color& color) : position(position), size(size), color(color) {
+    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 position, const glm::vec2 size, const Color& color) : position(position), size(size), textureSize(size), color(color) {
         const float vertices[] = {
             // positions                                                    // texture coords
             static_cast<float>(size.x), 0.0f, 0.0f,                         1.0f, 1.0f, // top right
@@ -44,10 +44,17 @@ namespace CPL {
         stbi_set_flip_vertically_on_load(true);
         int width, height;
         unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
+        GLenum format = 0;
+        if (channels == 1)
+            format = GL_RED;
+        else if (channels == 3)
+            format = GL_RGB;
+        else if (channels == 4)
+            format = GL_RGBA;
         if (data) {
             this->size.x = static_cast<float>(width);
             this->size.y = static_cast<float>(height);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(this->size.x), static_cast<GLsizei>(this->size.y), 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(format), static_cast<GLsizei>(this->size.x), static_cast<GLsizei>(this->size.y), 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else {
@@ -56,7 +63,7 @@ namespace CPL {
         stbi_image_free(data);
     }
 
-    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 size) : position(0.0f), size(size), color(WHITE) {
+    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 size) : position(0.0f), size(size), textureSize(size), color(WHITE) {
         const float vertices[] = {
             // positions                        // texture coords
             this->size.x, 0.0f, 0.0f,           1.0f, 1.0f, // top right
@@ -95,10 +102,17 @@ namespace CPL {
         stbi_set_flip_vertically_on_load(true);
         int width, height;
         unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
+        GLenum format = 0;
+        if (channels == 1)
+            format = GL_RED;
+        else if (channels == 3)
+            format = GL_RGB;
+        else if (channels == 4)
+            format = GL_RGBA;
         if (data) {
             this->size.x = static_cast<float>(width);
             this->size.y = static_cast<float>(height);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(this->size.x), static_cast<GLsizei>(this->size.y), 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(format), static_cast<GLsizei>(this->size.x), static_cast<GLsizei>(this->size.y), 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else {
@@ -109,7 +123,7 @@ namespace CPL {
 
     void Texture2D::Draw(const Shader& shader) const {
         auto transform = glm::mat4(1.0f);
-        const glm::vec2 center = {position.x + size.x, position.y + size.y};
+        const glm::vec2 center = {position.x + textureSize.x / 2, position.y + textureSize.y / 2};
         transform = glm::translate(transform, glm::vec3(center, 0.0f));
         transform = glm::rotate(transform, glm::radians(rotationAngle), glm::vec3(0.0f, 0.0f, 1.0f));
         transform = glm::translate(transform, glm::vec3(-center, 0.0f));

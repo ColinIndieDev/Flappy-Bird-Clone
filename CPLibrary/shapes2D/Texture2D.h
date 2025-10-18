@@ -10,6 +10,7 @@ namespace CPL {
     public:
         glm::vec2 position;
         glm::vec2 size;
+        glm::vec2 textureSize;
         int channels{};
         float rotationAngle = 0;
         Color color;

@@ -21,6 +21,7 @@ namespace CPL {
         static void Init(const std::string& fontPath, const std::string& fontName);
         static void Use(const std::string& fontName);
         static void DrawText(const Shader& shader, const std::string& text, glm::vec2 pos, float scale, const Color& color);
+        static glm::vec2 GetTextSize(const std::string& fontName, const std::string& text, float scale);
     private:
         static unsigned int VAO, VBO;
         static std::string currentFont;

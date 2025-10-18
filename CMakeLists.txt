@@ -3,6 +3,11 @@ project(OpenGLGame)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Detect if we're using Emscripten
+if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
+    set(PLATFORM "Web")
+endif()
+
 # OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -59,6 +64,7 @@ add_executable(OpenGLGame main.cpp
         CPLibrary/timers/TimerManager.cpp
         CPLibrary/timers/TimerManager.h
         CPLibrary/CPLibrary.h
+        CPLibrary/Logging.h
 )
 
 # GLM
@@ -72,3 +78,15 @@ target_link_libraries(OpenGLGame PRIVATE glfw glad freetype)
 if (WIN32)
     target_link_libraries(OpenGLGame PRIVATE opengl32)
 endif ()
+
+# Web-specific options
+if(PLATFORM STREQUAL "Web")
+    set_target_properties(OpenGLGame PROPERTIES SUFFIX ".html")
+
+    target_link_options(OpenGLGame PRIVATE
+            "-sUSE_GLFW=3"
+            "-sASYNCIFY"
+            "-sFULL_ES2=1"
+            "-sFORCE_FILESYSTEM=1"
+    )
+endif()

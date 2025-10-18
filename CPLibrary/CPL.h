@@ -47,29 +47,23 @@ namespace CPL {
 
     inline std::mt19937 gen{std::random_device{}()};
 
+    inline std::unordered_map<int, bool> keyStates;
+    inline std::unordered_map<int, bool> prevKeyStates;
+
     inline GLFWwindow* window;
 
     struct Camera2D {
+        glm::vec2 position{0.0f};
         float zoom = 1.0f;
         float rotation = 0.0f;
 
-        void Init() {
-            position = {-static_cast<float>(SCREEN_WIDTH) / 2.0f, -static_cast<float>(SCREEN_HEIGHT) / 2.0f};
-        }
-
-        void SetPosition(const glm::vec2 position) {
-            this->position = position - glm::vec2(static_cast<float>(SCREEN_WIDTH) / 2.0f, static_cast<float>(SCREEN_HEIGHT) / 2.0f);
-        }
-
         [[nodiscard]] glm::mat4 GetViewMatrix() const {
             auto view = glm::mat4(1.0f);
-            view = glm::translate(view, glm::vec3(-position, 0.0f));
+            view = glm::translate(view, glm::vec3(-glm::vec2{position.x - static_cast<float>(SCREEN_WIDTH) / 2.0f, position.y - static_cast<float>(SCREEN_HEIGHT) / 2.0f}, 0.0f));
             view  = glm::scale(view, glm::vec3(zoom, zoom, 1.0f));
             view = glm::rotate(view, glm::radians(rotation), glm::vec3(0, 0, 1));
             return view;
         }
-    private:
-        glm::vec2 position{0.0f};
     };
 
     inline Camera2D camera;
@@ -107,7 +101,8 @@ namespace CPL {
         glUseProgram(0);
     }
 
-    inline void framebuffer_size_callback(GLFWwindow* window, const int width, const int height) {
+    // [[maybe_unused]] so CLion doesn't annoy me with redundant window
+    inline void framebuffer_size_callback([[maybe_unused]] GLFWwindow* window, const int width, const int height) {
         glViewport(0, 0, width, height);
     }
 
@@ -147,6 +142,13 @@ namespace CPL {
         return glfwWindowShouldClose(window);
     }
 
+    inline int GetScreenWidth() {
+        return static_cast<int>(SCREEN_WIDTH);
+    }
+    inline int GetScreenHeight() {
+        return static_cast<int>(SCREEN_HEIGHT);
+    }
+
     inline int RandInt(const int min, const int max) {
         std::uniform_int_distribution dist(min, max);
         return dist(gen);
@@ -166,11 +168,27 @@ namespace CPL {
         return dist(gen) <= percent;
     }
 
-    inline int IsKeyDown(const int keycode) {
-        return glfwGetKey(window, keycode) == GLFW_PRESS;
+    inline void UpdateInput() {
+        prevKeyStates = keyStates;
+        for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; ++key) {
+            keyStates[key] = glfwGetKey(window, key) == GLFW_PRESS;
+        }
     }
-    inline int IsKeyUp(const int keycode) {
-        return glfwGetKey(window, keycode) == GLFW_RELEASE;
+
+    inline bool IsKeyDown(const int key) {
+        return keyStates[key];
+    }
+
+    inline bool IsKeyUp(const int key) {
+        return !keyStates[key];
+    }
+
+    inline bool IsKeyPressedOnce(const int key) {
+        return keyStates[key] && !prevKeyStates[key];
+    }
+
+    inline bool IsKeyReleased(const int key) {
+        return !keyStates[key] && prevKeyStates[key];
     }
 
     inline void CloseWindow() { glfwTerminate(); }

@@ -72,6 +72,7 @@ namespace CPL {
         }
 
         InitShaders();
+        Text::Init("../assets/fonts/default.ttf", "defaultFont");
 
         // ----- For the font & 2D textures ----- //
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -90,6 +91,7 @@ namespace CPL {
             shader = textShader;
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            Text::Use("defaultFont");
         }
         else if (mode == TEXTURE_2D) shader = textureShader;
 
@@ -170,13 +172,10 @@ namespace CPL {
     }
 
     void DrawText(const glm::vec2 position, const float scale, const std::string& text, const Color& color) {
-        if (Text::Fonts.empty()) Text::Init("../assets/fonts/determination.ttf", "defaultFont");
         Text::DrawText(textShader, text, position, scale, color);
     }
     void DrawTextShadow(const glm::vec2 position, const glm::vec2 shadowOffset, const float scale, const std::string& text, const Color& color, const Color& shadowColor) {
-        if (Text::Fonts.empty()) Text::Init("../assets/fonts/determination.ttf", "defaultFont");
         Text::DrawText(textShader, text, {position.x + shadowOffset.x, position.y - shadowOffset.y}, scale, shadowColor);
         Text::DrawText(textShader, text, position, scale, color);
     }
-
 }

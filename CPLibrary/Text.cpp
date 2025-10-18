@@ -3,6 +3,7 @@
 #include <filesystem>
 #include "CPL.h"
 #include "Shader.h"
+#include "Logging.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -16,19 +17,19 @@ namespace CPL {
         // ----- Freetype ----- //
         FT_Library ft;
         if (FT_Init_FreeType(&ft)) {
-            std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+            Logging::Log(2, "Could not init FreeType Library");
             exit(-1);
         }
 
         if (const std::string font_name = std::filesystem::path(fontPath).string();
             font_name.empty()) {
-            std::cout << "ERROR::FREETYPE: Failed to load fontName" << std::endl;
+            Logging::Log(2, "Failed to load " + font_name);
             exit(-1);
         }
 
         FT_Face face;
         if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
-            std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+            Logging::Log(2, "Failed to load font");
             exit(-1);
         }
         FT_Set_Pixel_Sizes(face, 0, 48);
@@ -37,7 +38,7 @@ namespace CPL {
         std::map<GLchar, Character> characters;
         for (unsigned char c = 0; c < 128; c++) {
             if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-                std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
+                Logging::Log(2, "Failed to load Glyph");
                 continue;
             }
 
@@ -90,7 +91,8 @@ namespace CPL {
     }
 
     void Text::Use(const std::string& fontName) {
-        currentFont = fontName;
+        if (Fonts.contains(fontName)) currentFont = fontName;
+        else Logging::Log(1, "Cannot find font");
     }
 
     void Text::DrawText(const Shader& shader, const std::string& text, glm::vec2 pos, const float scale, const Color& color) {
@@ -132,5 +134,27 @@ namespace CPL {
         }
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    glm::vec2 Text::GetTextSize(const std::string& fontName, const std::string& text, const float scale) {
+        if (!Fonts.contains(fontName)) {
+            Logging::Log(1, "Cannot find font");
+            return glm::vec2(0.0f);
+        }
+
+        float width = 0.0f;
+        float height = 0.0f;
+        float maxAboveBaseline = 0.0f;
+        float maxBelowBaseline = 0.0f;
+
+        for (char c : text) {
+            const Character& ch = Fonts[fontName].at(c);
+            const float h = static_cast<float>(ch.Size.y) * scale;
+            maxAboveBaseline = std::max(maxAboveBaseline, static_cast<float>(ch.Bearing.y) * scale);
+            maxBelowBaseline = std::max(maxBelowBaseline, (h - static_cast<float>(ch.Bearing.y) * scale));
+            width += static_cast<float>(ch.Advance >> 6) * scale;
+        }
+        height = maxAboveBaseline + maxBelowBaseline;
+        return {width, height};
     }
 }
