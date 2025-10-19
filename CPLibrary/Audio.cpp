@@ -13,10 +13,13 @@ namespace CPL {
         }
     }
 
-    void AudioManager::PlaySFX(const std::string& audioPath) {
-        ma_engine_play_sound(&engine, audioPath.c_str(), nullptr);
+    Audio AudioManager::LoadAudio(const std::string& audioPath) {
+        return {audioPath};
     }
 
+    void AudioManager::PlaySFX(const Audio& audio) {
+        ma_engine_play_sound(&engine, audio.path.c_str(), nullptr);
+    }
 
     void AudioManager::Close() {
         ma_engine_uninit(&engine);

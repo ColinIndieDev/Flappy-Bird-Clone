@@ -50,9 +50,12 @@ namespace CPL {
 
     inline std::unordered_map<int, bool> keyStates;
     inline std::unordered_map<int, bool> prevKeyStates;
+    inline std::unordered_map<int, bool> mouseButtons;
+    inline std::unordered_map<int, bool> prevMouseButtons;
 
     inline GLFWwindow* window;
 
+    struct Audio;
     class AudioManager;
 
     struct Camera2D {
@@ -174,25 +177,42 @@ namespace CPL {
 
     inline void UpdateInput() {
         prevKeyStates = keyStates;
-        for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; ++key) {
+        for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
             keyStates[key] = glfwGetKey(window, key) == GLFW_PRESS;
+        }
+
+        prevMouseButtons = mouseButtons;
+        for (int button = GLFW_MOUSE_BUTTON_1; button <= GLFW_MOUSE_BUTTON_LAST; button++) {
+            mouseButtons[button] = glfwGetMouseButton(window, button) == GLFW_PRESS;
         }
     }
 
     inline bool IsKeyDown(const int key) {
         return keyStates[key];
     }
-
     inline bool IsKeyUp(const int key) {
         return !keyStates[key];
     }
-
     inline bool IsKeyPressedOnce(const int key) {
         return keyStates[key] && !prevKeyStates[key];
     }
-
     inline bool IsKeyReleased(const int key) {
         return !keyStates[key] && prevKeyStates[key];
+    }
+
+    inline bool IsMouseDown(const int button) {
+        return mouseButtons[button];
+    }
+    inline bool IsMousePressedOnce(const int button) {
+        return mouseButtons[button] && !prevMouseButtons[button];
+    }
+    inline bool IsMouseReleased(const int button) {
+        return !mouseButtons[button] && prevMouseButtons[button];
+    }
+    inline glm::vec2 GetMousePosition() {
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        return {x, y};
     }
 
     inline void CloseWindow() { glfwTerminate(); }
