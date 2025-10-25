@@ -1,4 +1,5 @@
 #include "CPL.h"
+#include "Audio.h"
 #include "shapes2D/Triangle.h"
 #include "shapes2D/Rectangle.h"
 #include "shapes2D/Circle.h"
@@ -6,11 +7,19 @@
 #include "Shader.h"
 #include "Text.h"
 #include "shapes2D/Texture2D.h"
+#include "timers/TimerManager.h"
 
 namespace CPL {
     Shader shapeShader;
     Shader textShader;
     Shader textureShader;
+
+    void UpdateCPL() {
+        UpdateInput();
+        CalculateDeltaTime();
+        CalculateFPS();
+        TimerManager::Update(GetDeltaTime());
+    }
 
     void ShowDetails() {
         const GLubyte* renderer = glGetString(GL_RENDERER);
@@ -31,7 +40,6 @@ namespace CPL {
         DrawTextShadow({0, 130}, {2, 2}, 0.3, versionText, WHITE, DARK_GRAY);
         EndDrawing();
     }
-
 
     bool CheckCollisionRects(const Rectangle& one, const Rectangle& two) {
         const bool collisionX = one.position.x + one.size.x >= two.position.x &&
@@ -81,7 +89,7 @@ namespace CPL {
         }
 
         InitShaders();
-        Text::Init("../assets/fonts/default.ttf", "defaultFont");
+        Text::Init("../assets/fonts/default.ttf", "defaultFont", NEAREST);
 
         // ----- For the font & 2D textures ----- //
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

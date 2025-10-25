@@ -5,7 +5,7 @@
 #include <stb_image.h>
 
 namespace CPL {
-    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 position, const glm::vec2 size, const Color& color) : position(position), size(size), textureSize(size), color(color) {
+    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 position, const glm::vec2 size, const Color& color, const TextureFiltering& textureFiltering) : position(position), size(size), textureSize(size), color(color) {
         const float vertices[] = {
             // positions                                                    // texture coords
             static_cast<float>(size.x), 0.0f, 0.0f,                         1.0f, 1.0f, // top right
@@ -39,8 +39,8 @@ namespace CPL {
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltering == LINEAR ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFiltering == LINEAR ? GL_LINEAR : GL_NEAREST);
         stbi_set_flip_vertically_on_load(true);
         int width, height;
         unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
@@ -58,12 +58,12 @@ namespace CPL {
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else {
-            std::cout << "Failed to load texture" << std::endl;
+            Logging::Log(2, "Failed to load texture");
         }
         stbi_image_free(data);
     }
 
-    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 size) : position(0.0f), size(size), textureSize(size), color(WHITE) {
+    Texture2D::Texture2D(const std::string& filePath, const glm::vec2 size, const TextureFiltering& textureFiltering) : position(0.0f), size(size), textureSize(size), color(WHITE) {
         const float vertices[] = {
             // positions                        // texture coords
             this->size.x, 0.0f, 0.0f,           1.0f, 1.0f, // top right
@@ -97,8 +97,8 @@ namespace CPL {
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltering == LINEAR ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFiltering == LINEAR ? GL_LINEAR : GL_NEAREST);
         stbi_set_flip_vertically_on_load(true);
         int width, height;
         unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
@@ -116,7 +116,7 @@ namespace CPL {
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else {
-            std::cout << "Failed to load texture" << std::endl;
+            Logging::Log(2, "Failed to load texture");
         }
         stbi_image_free(data);
     }

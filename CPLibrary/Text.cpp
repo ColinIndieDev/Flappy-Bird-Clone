@@ -13,7 +13,7 @@ namespace CPL {
     unsigned int Text::VAO;
     unsigned int Text::VBO;
 
-    void Text::Init(const std::string& fontPath, const std::string& fontName) {
+    void Text::Init(const std::string& fontPath, const std::string& fontName, const TextureFiltering& textureFiltering) {
         // ----- Freetype ----- //
         FT_Library ft;
         if (FT_Init_FreeType(&ft)) {
@@ -59,8 +59,8 @@ namespace CPL {
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltering == LINEAR ? GL_LINEAR : GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFiltering == LINEAR ? GL_LINEAR : GL_NEAREST);
 
             Character character = {
                 texture,

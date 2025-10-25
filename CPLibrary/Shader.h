@@ -1,8 +1,7 @@
 #pragma once
 
 #include <string>
-
-#include "fwd.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace CPL {
     struct Color;

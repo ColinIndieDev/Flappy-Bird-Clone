@@ -1,8 +1,7 @@
 #pragma once
 #include <map>
 #include <string>
-#include "vec2.hpp"
-#include "vec3.hpp"
+#include <glm/glm.hpp>
 #include "glad/glad.h"
 #include "CPL.h"
 
@@ -18,7 +17,7 @@ namespace CPL {
     public:
         static std::map<std::string, std::map<GLchar, Character>> Fonts;
 
-        static void Init(const std::string& fontPath, const std::string& fontName);
+        static void Init(const std::string& fontPath, const std::string& fontName, const TextureFiltering& textureFiltering);
         static void Use(const std::string& fontName);
         static void DrawText(const Shader& shader, const std::string& text, glm::vec2 pos, float scale, const Color& color);
         static glm::vec2 GetTextSize(const std::string& fontName, const std::string& text, float scale);

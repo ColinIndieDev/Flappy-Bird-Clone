@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vec2.hpp"
+#include <glm/glm.hpp>
 #include "../CPL.h"
 
 namespace CPL {

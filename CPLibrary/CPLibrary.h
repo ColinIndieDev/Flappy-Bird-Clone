@@ -12,3 +12,4 @@
 #include "../CPLibrary/Shader.h"
 #include "../CPLibrary/Text.h"
 #include "../CPLibrary/CPL.h"
+#include "../CPLibrary/Audio.h"

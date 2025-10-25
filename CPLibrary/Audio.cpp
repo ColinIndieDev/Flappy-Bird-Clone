@@ -5,6 +5,7 @@
 
 namespace CPL {
     ma_engine AudioManager::engine;
+    std::unique_ptr<ma_sound> AudioManager::music;
 
     void AudioManager::Init() {
         if (ma_engine_init(nullptr, &engine) != MA_SUCCESS) {
@@ -18,7 +19,84 @@ namespace CPL {
     }
 
     void AudioManager::PlaySFX(const Audio& audio) {
-        ma_engine_play_sound(&engine, audio.path.c_str(), nullptr);
+        const auto sound = new ma_sound;
+        if (const ma_result result = ma_sound_init_from_file(&engine, audio.path.c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, sound);
+            result != MA_SUCCESS) {
+            Logging::Log(2, "Failed to initialize SFX!");
+            return;
+        }
+        ma_sound_set_pitch(sound, 1.0f);
+        ma_sound_set_looping(sound, MA_FALSE);
+        ma_sound_start(sound);
+    }
+
+    void AudioManager::PlaySFXPitch(const Audio& audio, const float pitch) {
+        const auto sound = new ma_sound;
+        if (const ma_result result = ma_sound_init_from_file(&engine, audio.path.c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, sound);
+            result != MA_SUCCESS) {
+            Logging::Log(2, "Failed to initialize SFX!");
+            return;
+        }
+        ma_sound_set_pitch(sound, pitch);
+        ma_sound_set_looping(sound, MA_FALSE);
+        ma_sound_start(sound);
+    }
+
+    void AudioManager::PlayMusic(const Audio& audio) {
+        const auto sound = new ma_sound;
+        if (const ma_result result = ma_sound_init_from_file(&engine, audio.path.c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, sound);
+            result != MA_SUCCESS) {
+            Logging::Log(2, "Failed to initialize SFX!");
+            return;
+        }
+        ma_sound_set_pitch(sound, 1.0f);
+        ma_sound_set_looping(sound, MA_TRUE);
+        ma_sound_start(sound);
+    }
+
+    void AudioManager::PlayMusic1(const Audio& audio) {
+        if (music) {
+            ma_sound_stop(music.get());
+            ma_sound_uninit(music.get());
+            music.reset();
+        }
+
+        music = std::make_unique<ma_sound>();
+        if (ma_sound_init_from_file(&engine, audio.path.c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, music.get()) != MA_SUCCESS) {
+            std::cerr << "Failed to load music: " << audio.path << "\n";
+            music.reset();
+            return;
+        }
+
+        ma_sound_set_looping(music.get(), MA_TRUE);
+        ma_sound_start(music.get());
+    }
+
+    void AudioManager::PauseMusic() {
+        if (music) ma_sound_stop(music.get());
+    }
+
+    void AudioManager::ResumeMusic() {
+        if (music) ma_sound_start(music.get());
+    }
+
+    void AudioManager::StopMusic() {
+        if (music) {
+            ma_sound_stop(music.get());
+            ma_sound_seek_to_pcm_frame(music.get(), 0); // zurück zum Anfang
+        }
+    }
+
+    void AudioManager::PlayMusicPitch(const Audio& audio, const float pitch) {
+        const auto sound = new ma_sound;
+        if (const ma_result result = ma_sound_init_from_file(&engine, audio.path.c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, sound);
+            result != MA_SUCCESS) {
+            Logging::Log(2, "Failed to initialize SFX!");
+            return;
+            }
+        ma_sound_set_pitch(sound, pitch);
+        ma_sound_set_looping(sound, MA_TRUE);
+        ma_sound_start(sound);
     }
 
     void AudioManager::Close() {

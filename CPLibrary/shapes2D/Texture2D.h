@@ -15,8 +15,8 @@ namespace CPL {
         float rotationAngle = 0;
         Color color;
 
-        explicit Texture2D(const std::string& filePath, glm::vec2 size);
-        Texture2D(const std::string& filePath, glm::vec2 position, glm::vec2 size, const Color& color);
+        explicit Texture2D(const std::string& filePath, glm::vec2 size, const TextureFiltering& textureFiltering);
+        Texture2D(const std::string& filePath, glm::vec2 position, glm::vec2 size, const Color& color, const TextureFiltering& textureFiltering);
         void Draw(const Shader& shader) const;
     private:
         unsigned int VBO{}, VAO{}, EBO{};

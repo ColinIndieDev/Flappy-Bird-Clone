@@ -2,9 +2,8 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <random>
@@ -19,6 +18,10 @@ namespace CPL {
         SHAPE_2D,
         TEXTURE_2D,
         TEXT,
+    };
+    enum TextureFiltering {
+        NEAREST,
+        LINEAR,
     };
 
     struct Color {
@@ -73,6 +76,8 @@ namespace CPL {
     };
 
     inline Camera2D camera;
+
+    void UpdateCPL();
 
     bool CheckCollisionRects(const Rectangle& one, const Rectangle& two);
     bool CheckCollisionCircleRect(const Circle& one, const Rectangle& two);
@@ -131,10 +136,11 @@ namespace CPL {
 
     inline float deltaTime = 0;
     inline float lastFrame = 0;
+    inline float timeScale = 1.0f;
 
     inline void CalculateDeltaTime() {
         const auto currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
+        deltaTime = (currentFrame - lastFrame) * timeScale;
         lastFrame = currentFrame;
     }
 
@@ -149,11 +155,11 @@ namespace CPL {
         return glfwWindowShouldClose(window);
     }
 
-    inline int GetScreenWidth() {
-        return static_cast<int>(SCREEN_WIDTH);
+    inline float GetScreenWidth() {
+        return static_cast<float>(SCREEN_WIDTH);
     }
-    inline int GetScreenHeight() {
-        return static_cast<int>(SCREEN_HEIGHT);
+    inline float GetScreenHeight() {
+        return static_cast<float>(SCREEN_HEIGHT);
     }
 
     inline int RandInt(const int min, const int max) {
@@ -213,6 +219,13 @@ namespace CPL {
         double x, y;
         glfwGetCursorPos(window, &x, &y);
         return {x, y};
+    }
+    inline glm::vec2 GetMousePositionWorld() {
+        const glm::vec2 screenCenter = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+        glm::vec2 world;
+        world.x = (GetMousePosition().x - screenCenter.x) / camera.zoom + camera.position.x;
+        world.y = (GetMousePosition().y - screenCenter.y) / camera.zoom + camera.position.y;
+        return world;
     }
 
     inline void CloseWindow() { glfwTerminate(); }

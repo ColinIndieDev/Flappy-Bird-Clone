@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <bits/ostream.tcc>
 
 namespace Logging {
     inline void Log(const int warnLevel, const std::string& text) {
