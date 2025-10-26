@@ -15,6 +15,7 @@ namespace CPL {
         mutable float rotationAngle = 0.0f;
 
         explicit Circle(glm::vec2 pos, float radius, Color color);
+        ~Circle();
         void Draw(const Shader& shader) const;
         void DrawOutline(const Shader& shader) const;
     private:

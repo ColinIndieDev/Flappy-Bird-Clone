@@ -18,6 +18,7 @@ namespace CPL {
         explicit Texture2D(const std::string& filePath, glm::vec2 size, const TextureFiltering& textureFiltering);
         Texture2D(const std::string& filePath, glm::vec2 position, glm::vec2 size, const Color& color, const TextureFiltering& textureFiltering);
         void Draw(const Shader& shader) const;
+        void Unload() const;
     private:
         unsigned int VBO{}, VAO{}, EBO{};
         unsigned int texture{};

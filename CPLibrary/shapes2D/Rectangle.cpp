@@ -45,6 +45,33 @@ namespace CPL {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+    Rectangle::~Rectangle() {
+        if (VAO != 0 && glIsVertexArray(VAO)) {
+            glDeleteVertexArrays(1, &VAO);
+            VAO = 0;
+        }
+        if (VBO != 0 && glIsBuffer(VBO)) {
+            glDeleteBuffers(1, &VBO);
+            VBO = 0;
+        }
+        if (outlineVAO != 0 && glIsVertexArray(outlineVAO)) {
+            glDeleteVertexArrays(1, &outlineVAO);
+            outlineVAO = 0;
+        }
+        if (outlineVBO != 0 && glIsBuffer(outlineVBO)) {
+            glDeleteBuffers(1, &outlineVBO);
+            outlineVBO = 0;
+        }
+        if (EBO != 0 && glIsBuffer(EBO)) {
+            glDeleteBuffers(1, &EBO);
+            EBO = 0;
+        }
+        if (outlineEBO != 0 && glIsBuffer(outlineEBO)) {
+            glDeleteBuffers(1, &outlineEBO);
+            outlineEBO = 0;
+        }
+    }
+
 
     void Rectangle::Draw(const Shader& shader, const bool filled) const {
         auto transform = glm::mat4(1.0f);

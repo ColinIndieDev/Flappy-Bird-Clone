@@ -8,6 +8,8 @@
 #include "Text.h"
 #include "shapes2D/Texture2D.h"
 #include "timers/TimerManager.h"
+#include "stb_image.h"
+#include "Path.h"
 
 namespace CPL {
     Shader shapeShader;
@@ -19,6 +21,7 @@ namespace CPL {
         CalculateDeltaTime();
         CalculateFPS();
         TimerManager::Update(GetDeltaTime());
+        AudioManager::Update();
     }
 
     void ShowDetails() {
@@ -89,16 +92,39 @@ namespace CPL {
         }
 
         InitShaders();
-        Text::Init("../assets/fonts/default.ttf", "defaultFont", NEAREST);
+        Text::Init(Path::GetAssetPath("assets/fonts/default.ttf"), "defaultFont", NEAREST);
+        AudioManager::Init();
 
         // ----- For the font & 2D textures ----- //
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     }
 
+    void SetWindowIcon(const std::string& filePath) {
+        int width, height, channels;
+        stbi_load(filePath.c_str(), &width, &height, &channels, 0);
+        int requiredComponents = 0;
+        if (channels == 3) requiredComponents = 3;
+        else if (channels == 4) requiredComponents = 4;
+        GLFWimage images[1];
+        images[0].pixels = stbi_load(filePath.c_str(), &images[0].width, &images[0].height, nullptr, requiredComponents);
+        if (images[0].pixels) {
+            glfwSetWindowIcon(window, 1, images);
+            stbi_image_free(images[0].pixels);
+        }
+        else {
+            Logging::Log(2, "Failed to load icon");
+        }
+    }
+
+    void CloseWindow() {
+        glfwTerminate();
+        AudioManager::Close();
+    }
+
     void InitShaders() {
-        shapeShader = Shader("../CPLibrary/shaders/shader.vert", "../CPLibrary/shaders/shader.frag");
-        textShader = Shader("../CPLibrary/shaders/text.vert", "../CPLibrary/shaders/text.frag");
-        textureShader = Shader("../CPLibrary/shaders/texture.vert", "../CPLibrary/shaders/texture.frag");
+        shapeShader = Shader(Path::GetAssetPath("CPLibrary/shaders/shader.vert").c_str(), Path::GetAssetPath("CPLibrary/shaders/shader.frag").c_str());
+        textShader = Shader(Path::GetAssetPath("CPLibrary/shaders/text.vert").c_str(), Path::GetAssetPath("CPLibrary/shaders/text.frag").c_str());
+        textureShader = Shader(Path::GetAssetPath("CPLibrary/shaders/texture.vert").c_str(), Path::GetAssetPath("CPLibrary/shaders/texture.frag").c_str());
     }
 
     void BeginDrawing(const DrawModes& mode, const bool mode2D) {
@@ -136,7 +162,6 @@ namespace CPL {
         triangle.rotationAngle = angle;
         triangle.Draw(shapeShader, false);
     }
-
 
     void DrawRectangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
         const auto rectangle = Rectangle(position, size, color);

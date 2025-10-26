@@ -15,6 +15,7 @@ namespace CPL {
         mutable float rotationAngle = 0.0f;
 
         explicit Rectangle(glm::vec2 pos, glm::vec2 size, Color color);
+        ~Rectangle();
         void Draw(const Shader& shader, bool filled) const;
     private:
         unsigned int outlineVBO{}, outlineVAO{}, outlineEBO{};

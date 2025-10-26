@@ -62,7 +62,6 @@ namespace CPL {
         }
         stbi_image_free(data);
     }
-
     Texture2D::Texture2D(const std::string& filePath, const glm::vec2 size, const TextureFiltering& textureFiltering) : position(0.0f), size(size), textureSize(size), color(WHITE) {
         const float vertices[] = {
             // positions                        // texture coords
@@ -119,6 +118,15 @@ namespace CPL {
             Logging::Log(2, "Failed to load texture");
         }
         stbi_image_free(data);
+    }
+
+    void Texture2D::Unload() const {
+        if (texture != 0)
+            glDeleteTextures(1, &texture);
+        if (VAO != 0)
+            glDeleteVertexArrays(1, &VAO);
+        if (VBO != 0)
+            glDeleteBuffers(1, &VBO);
     }
 
     void Texture2D::Draw(const Shader& shader) const {

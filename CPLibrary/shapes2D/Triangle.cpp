@@ -23,6 +23,16 @@ namespace CPL {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+    Triangle::~Triangle() {
+        if (VAO != 0 && glIsVertexArray(VAO)) {
+            glDeleteVertexArrays(1, &VAO);
+            VAO = 0;
+        }
+        if (VBO != 0 && glIsBuffer(VBO)) {
+            glDeleteBuffers(1, &VBO);
+            VBO = 0;
+        }
+    }
 
     void Triangle::Draw(const Shader& shader, const bool filled) const {
         auto transform = glm::mat4(1.0f);

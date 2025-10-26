@@ -150,6 +150,8 @@ namespace CPL {
     void ShowDetails();
 
     void InitWindow(int width, int height, const char* title);
+    void SetWindowIcon(const std::string& filePath);
+    void CloseWindow();
 
     inline int WindowShouldClose() {
         return glfwWindowShouldClose(window);
@@ -227,6 +229,4 @@ namespace CPL {
         world.y = (GetMousePosition().y - screenCenter.y) / camera.zoom + camera.position.y;
         return world;
     }
-
-    inline void CloseWindow() { glfwTerminate(); }
 }

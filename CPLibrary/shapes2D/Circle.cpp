@@ -42,6 +42,24 @@ namespace CPL {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+    Circle::~Circle() {
+        if (VAO != 0 && glIsVertexArray(VAO)) {
+            glDeleteVertexArrays(1, &VAO);
+            VAO = 0;
+        }
+        if (VBO != 0 && glIsBuffer(VBO)) {
+            glDeleteBuffers(1, &VBO);
+            VBO = 0;
+        }
+        if (outlineVAO != 0 && glIsVertexArray(outlineVAO)) {
+            glDeleteVertexArrays(1, &outlineVAO);
+            outlineVAO = 0;
+        }
+        if (outlineVBO != 0 && glIsBuffer(outlineVBO)) {
+            glDeleteBuffers(1, &outlineVBO);
+            outlineVBO = 0;
+        }
+    }
 
     void Circle::Draw(const Shader& shader) const {
         auto transform = glm::mat4(1.0f);

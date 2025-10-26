@@ -19,6 +19,17 @@ namespace CPL {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+    Line::~Line() {
+        if (VAO != 0 && glIsVertexArray(VAO)) {
+            glDeleteVertexArrays(1, &VAO);
+            VAO = 0;
+        }
+        if (VBO != 0 && glIsBuffer(VBO)) {
+            glDeleteBuffers(1, &VBO);
+            VBO = 0;
+        }
+    }
+
 
     void Line::Draw(const Shader& shader) const {
         shader.SetMatrix4fv("transform", glm::mat4(1.0f));

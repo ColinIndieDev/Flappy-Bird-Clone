@@ -14,6 +14,7 @@ namespace CPL {
         Color color;
 
         explicit Line(glm::vec2 startPos, glm::vec2 endPos, const Color& color);
+        ~Line();
         void Draw(const Shader& shader) const;
     private:
         unsigned int VBO{}, VAO{};

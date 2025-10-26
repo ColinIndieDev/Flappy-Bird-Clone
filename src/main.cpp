@@ -1,4 +1,5 @@
-#include "CPLibrary/CPLibrary.h"
+#include "../CPLibrary/CPLibrary.h"
+#include "../CPLibrary/Path.h"
 #include <filesystem>
 #include <fstream>
 
@@ -148,12 +149,21 @@ void RemovePipe() {
     std::erase_if(pipes, [](const Pipe &p) { return !p.active; });
 }
 
-void MainLoop(Bird& player, Audio& flySound, Audio& restartSound, Audio& damageSound, Background& background, Texture2D& birdTexture, Texture2D& skyTexture2, Texture2D& pipeTexture) {
+std::unique_ptr<Texture2D> skyTexture;
+std::unique_ptr<Texture2D> birdTexture;
+std::unique_ptr<Texture2D> pipeTexture;
+Bird player{};
+Background background{};
+Audio damageSound;
+Audio flySound;
+Audio restartSound;
+Audio music;
+
+void MainLoop() {
     UpdateCPL();
 
     HandleInput(player, flySound, restartSound);
     UpdateHighScore();
-
     if (!gameOver) background.Update();
     if (player.isFalling && !gameOver) player.Update();
     if (gameOver) player.GameOverAnimation();
@@ -170,7 +180,7 @@ void MainLoop(Bird& player, Audio& flySound, Audio& restartSound, Audio& damageS
     }
     RemovePipe();
 
-    Circle playerCircle(player.position, birdTexture.textureSize.x / 4 - 4, WHITE);
+    Circle playerCircle(player.position, birdTexture->textureSize.x / 4 - 4, WHITE);
     for (auto& pipe : pipes) {
         if (!gameOver) pipe.Update();
         Rectangle upperPipeRect(pipe.position, pipe.size, WHITE);
@@ -186,7 +196,7 @@ void MainLoop(Bird& player, Audio& flySound, Audio& restartSound, Audio& damageS
         player.velocity = 0;
         player.position.y = 0;
     }
-    else if (!gameOver && player.position.y - birdTexture.textureSize.y / 4 >= GetScreenHeight()) {
+    else if (!gameOver && player.position.y - birdTexture->textureSize.y / 4 >= GetScreenHeight()) {
         AudioManager::PlaySFX(damageSound);
         gameOver = true;
     }
@@ -194,14 +204,14 @@ void MainLoop(Bird& player, Audio& flySound, Audio& restartSound, Audio& damageS
     ClearBackground(BLACK);
     BeginDrawing(TEXTURE_2D, false);
     for (auto& position : background.skyPositions) {
-        DrawTexture2D(&skyTexture2, position, WHITE);
+        DrawTexture2D(skyTexture.get(), position, WHITE);
     }
     for (const auto& pipe : pipes) {
-        DrawTexture2DRotated(&pipeTexture, pipe.position - glm::vec2(0, pipe.size.y + 145), 180, WHITE);
-        DrawTexture2DRotated(&pipeTexture, pipe.position - glm::vec2(0, 0), 0, WHITE);
+        DrawTexture2DRotated(pipeTexture.get(), pipe.position - glm::vec2(0, pipe.size.y + 145), 180, WHITE);
+        DrawTexture2DRotated(pipeTexture.get(), pipe.position - glm::vec2(0, 0), 0, WHITE);
     }
-    const glm::vec2 offset = {birdTexture.textureSize.x / 2, birdTexture.textureSize.y / 2};
-    DrawTexture2DRotated(&birdTexture, player.position - offset, player.rotation, WHITE);
+    const glm::vec2 offset = {birdTexture->textureSize.x / 2, birdTexture->textureSize.y / 2};
+    DrawTexture2DRotated(birdTexture.get(), player.position - offset, player.rotation, WHITE);
 
     BeginDrawing(SHAPE_2D, false);
     if (gameOver && !isRestarting) DrawRectangle({0, 0}, {GetScreenWidth(), GetScreenHeight()}, Color{0, 0, 0, 150});
@@ -227,38 +237,33 @@ void MainLoop(Bird& player, Audio& flySound, Audio& restartSound, Audio& damageS
 }
 int main() {
     InitWindow(800, 600, "Flappy Bird OpenGL");
-    AudioManager::Init();
+    SetWindowIcon(Path::GetAssetPath("assets/images/icon.png"));
 
     InitHighScoreFile();
     ReadHighScore();
-
-    auto skyTexture2 = Texture2D("../assets/images/background2.png", {GetScreenWidth(), GetScreenHeight()}, LINEAR);
-    auto birdTexture = Texture2D("../assets/images/bird.png", {100, 100}, LINEAR);
-    auto pipeTexture = Texture2D("../assets/images/pipe.png", {100, 500}, LINEAR);
-    Bird player{};
     player.position = {GetScreenWidth() / 2, GetScreenHeight() / 2};
     camera.position = glm::vec2{GetScreenWidth() / 2, GetScreenHeight() / 2};
-    Background background{};
     background.Init();
-
-    Audio damageSound = AudioManager::LoadAudio("../assets/sounds/damage.wav");
-    Audio flySound = AudioManager::LoadAudio("../assets/sounds/jump.mp3");
-    Audio restartSound = AudioManager::LoadAudio("../assets/sounds/restart.mp3");
-    Audio music = AudioManager::LoadAudio("../assets/sounds/music.mp3");
-
-    AudioManager::PlayMusic1(music);
+    skyTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/background2.png"), {GetScreenWidth(), GetScreenHeight()}, LINEAR));
+    birdTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/bird.png"), {100, 100}, LINEAR));
+    pipeTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/pipe.png"), {100, 500}, LINEAR));
+    damageSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/damage.wav"));
+    damageSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/damage.wav"));
+    flySound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/jump.mp3"));
+    restartSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/restart.mp3"));
+    music = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/music.mp3"));
+    AudioManager::PlayMusic(music);
 
     #ifdef __EMSCRIPTEN__
         emscripten_set_main_loop(MainLoop, 0, 1);
     #else
         while (!WindowShouldClose()) {
-            MainLoop(player, flySound, restartSound, damageSound, background, birdTexture, skyTexture2,  pipeTexture);
+            MainLoop();
         }
     #endif
 
     SaveHighScore();
     CloseWindow();
-    AudioManager::Close();
 }
 
 void HandleInput(Bird& player, const Audio& flySound, const Audio& restartSound) {
