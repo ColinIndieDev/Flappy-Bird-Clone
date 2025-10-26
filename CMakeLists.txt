@@ -122,9 +122,9 @@ target_link_libraries(OpenGLGame PRIVATE glfw glad freetype miniaudio glm)
 
 if (WIN32)
     # No terminal in release
-    #set_target_properties(OpenGLGame PROPERTIES
-    #    WIN32_EXECUTABLE TRUE
-    #)
+    set_target_properties(OpenGLGame PROPERTIES
+        WIN32_EXECUTABLE TRUE
+    )
 
     # OpenGL
     target_link_libraries(OpenGLGame PRIVATE opengl32)
