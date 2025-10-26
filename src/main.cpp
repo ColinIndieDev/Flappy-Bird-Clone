@@ -1,5 +1,6 @@
 #include "../CPLibrary/CPLibrary.h"
-#include "../CPLibrary/Path.h"
+
+#include "StartAnimation.h"
 #include <filesystem>
 #include <fstream>
 
@@ -162,7 +163,7 @@ Audio music;
 void MainLoop() {
     UpdateCPL();
 
-    HandleInput(player, flySound, restartSound);
+    if (!StartAnimation::isFading) HandleInput(player, flySound, restartSound);
     UpdateHighScore();
     if (!gameOver) background.Update();
     if (player.isFalling && !gameOver) player.Update();
@@ -230,6 +231,7 @@ void MainLoop() {
 
     ShowDetails();
 
+    StartAnimation::Update();
     EndDrawing();
 
     glfwSwapBuffers(window);
@@ -244,7 +246,7 @@ int main() {
     player.position = {GetScreenWidth() / 2, GetScreenHeight() / 2};
     camera.position = glm::vec2{GetScreenWidth() / 2, GetScreenHeight() / 2};
     background.Init();
-    skyTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/background2.png"), {GetScreenWidth(), GetScreenHeight()}, LINEAR));
+    skyTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/background.png"), {GetScreenWidth(), GetScreenHeight()}, LINEAR));
     birdTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/bird.png"), {100, 100}, LINEAR));
     pipeTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/pipe.png"), {100, 500}, LINEAR));
     damageSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/damage.wav"));
@@ -252,6 +254,7 @@ int main() {
     flySound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/jump.mp3"));
     restartSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/restart.mp3"));
     music = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/music.mp3"));
+    StartAnimation::Init();
     AudioManager::PlayMusic(music);
 
     #ifdef __EMSCRIPTEN__

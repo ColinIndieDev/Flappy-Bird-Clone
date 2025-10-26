@@ -16,7 +16,6 @@ if (PLATFORM STREQUAL "Web")
     set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
-    # Wichtige Option: Verhindere POSIX-Zeit-Backend
     set(GLFW_USE_POSIX_TIME OFF CACHE BOOL "" FORCE)
 
     set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
@@ -87,6 +86,7 @@ add_subdirectory(external/glad)
 set(BUILD_SHARED_LIBS OFF)
 add_executable(OpenGLGame src/main.cpp
         src/resources.rc
+        src/StartAnimation.h
         CPLibrary/Shader.cpp
         CPLibrary/Shader.h
         CPLibrary/shapes2D/Triangle.cpp
@@ -133,11 +133,9 @@ endif ()
 # Web-specific options
 if(PLATFORM STREQUAL "Web")
     set_target_properties(OpenGLGame PROPERTIES SUFFIX ".html")
-    # Richte Zielpfade korrekt ein
+
     set(ASSETS_SRC_DIR "${CMAKE_SOURCE_DIR}/assets")
     set(ASSETS_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets")
-
-    # Kopiere Assets ins aktuelle Build-Verzeichnis
     add_custom_command(TARGET OpenGLGame POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${ASSETS_SRC_DIR} ${ASSETS_DST_DIR}
