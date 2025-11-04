@@ -100,18 +100,11 @@ namespace CPL {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFiltering == LINEAR ? GL_LINEAR : GL_NEAREST);
         stbi_set_flip_vertically_on_load(true);
         int width, height;
-        unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
-        GLenum format = 0;
-        if (channels == 1)
-            format = GL_RED;
-        else if (channels == 3)
-            format = GL_RGB;
-        else if (channels == 4)
-            format = GL_RGBA;
+        unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
         if (data) {
             this->size.x = static_cast<float>(width);
             this->size.y = static_cast<float>(height);
-            glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(format), static_cast<GLsizei>(this->size.x), static_cast<GLsizei>(this->size.y), 0, format, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(this->size.x), static_cast<GLsizei>(this->size.y), 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else {
