@@ -81,7 +81,9 @@ namespace CPL {
 
     bool CheckCollisionRects(const Rectangle& one, const Rectangle& two);
     bool CheckCollisionCircleRect(const Circle& one, const Rectangle& two);
-
+    bool CheckCollisionVec2Rect(const glm::vec2& one, const Rectangle& two);
+    bool CheckCollisionCircleCircle(const Circle& one, const Circle& two);
+    bool CheckCollisionVec2Circle(const glm::vec2& one, const Circle& two);
     void InitShaders();
 
     void DrawTriangle(glm::vec2 position, glm::vec2 size, const Color& color);

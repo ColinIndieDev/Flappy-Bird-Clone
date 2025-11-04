@@ -63,6 +63,21 @@ namespace CPL {
 
         return glm::length(delta) <= one.radius;
     }
+    bool CheckCollisionVec2Rect(const glm::vec2& one, const Rectangle& two) {
+        return two.position.x < one.x && one.x < two.position.x + two.size.x
+            && two.position.y < one.y && one.y < two.position.y + two.size.y;
+    }
+    bool CheckCollisionCircleCircle(const Circle& one, const Circle& two) {
+        const glm::vec2 dist = one.position - two.position;
+        const float distanceSquared = dist.x * dist.x + dist.y * dist.y;
+        const float radiusSum = one.radius + two.radius;
+        return distanceSquared <= radiusSum * radiusSum;
+    }
+    bool CheckCollisionVec2Circle(const glm::vec2& one, const Circle& two) {
+        const glm::vec2 dist = one - two.position;
+        const float distanceSquared = dist.x * dist.x + dist.y * dist.y;
+        return distanceSquared <= two.radius * two.radius;
+    }
 
     void InitWindow(const int width, const int height, const char* title) {
         glfwInit();
