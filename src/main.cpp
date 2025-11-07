@@ -9,10 +9,7 @@
 #endif
 
 using namespace CPL;
-
-// ----- Prioritize GPUs from NVIDIA or AMD over Intel ----- //
 PRIORITIZE_GPU_BY_VENDOR
-// --------------------------------------------------------- //
 
 class Bird {
 public:
@@ -47,7 +44,7 @@ public:
 
     void Update() {
         position.x -= 100.0f * GetDeltaTime();
-        if (active & position.x + size.x < 0) active = false;
+        if (active && position.x + size.x < 0) active = false;
     }
 };
 std::vector<Pipe> pipes;
@@ -239,21 +236,21 @@ void MainLoop() {
 }
 int main() {
     InitWindow(800, 600, "Flappy Bird OpenGL");
-    SetWindowIcon(Path::GetAssetPath("assets/images/icon.png"));
+    SetWindowIcon("assets/images/icon.png");
 
     InitHighScoreFile();
     ReadHighScore();
     player.position = {GetScreenWidth() / 2, GetScreenHeight() / 2};
     camera.position = glm::vec2{GetScreenWidth() / 2, GetScreenHeight() / 2};
     background.Init();
-    skyTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/background.png"), {GetScreenWidth(), GetScreenHeight()}, LINEAR));
-    birdTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/bird.png"), {100, 100}, LINEAR));
-    pipeTexture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/pipe.png"), {100, 500}, LINEAR));
-    damageSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/damage.wav"));
-    damageSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/damage.wav"));
-    flySound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/jump.mp3"));
-    restartSound = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/restart.mp3"));
-    music = AudioManager::LoadAudio(Path::GetAssetPath("assets/sounds/music.mp3"));
+    skyTexture = std::make_unique<Texture2D>(Texture2D("assets/images/background.png", {GetScreenWidth(), GetScreenHeight()}, LINEAR));
+    birdTexture = std::make_unique<Texture2D>(Texture2D("assets/images/bird.png", {100, 100}, LINEAR));
+    pipeTexture = std::make_unique<Texture2D>(Texture2D("assets/images/pipe.png", {100, 500}, LINEAR));
+    damageSound = AudioManager::LoadAudio("assets/sounds/damage.wav");
+    damageSound = AudioManager::LoadAudio("assets/sounds/damage.wav");
+    flySound = AudioManager::LoadAudio("assets/sounds/jump.mp3");
+    restartSound = AudioManager::LoadAudio("assets/sounds/restart.mp3");
+    music = AudioManager::LoadAudio("assets/sounds/music.mp3");
     StartAnimation::Init();
     AudioManager::PlayMusic(music);
 

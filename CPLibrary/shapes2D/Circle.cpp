@@ -2,16 +2,16 @@
 #include "../CPL.h"
 #include <cmath>
 #include <vector>
-
 #include "../Shader.h"
 
+#define PI 3.14159265358979323846
 namespace CPL {
     Circle::Circle(const glm::vec2 pos, const float radius, const Color color) : position(pos), radius(radius), color(color) {
         std::vector<float> vertices;
         const int segments = std::ceil(radius);
         vertices.reserve(segments * 3);
         for (int i = 0; i <= segments; i++) {
-            const float theta = 2 * static_cast<float>(M_PI)  / static_cast<float>(segments) * static_cast<float>(i);
+            const float theta = 2 * static_cast<float>(PI)  / static_cast<float>(segments) * static_cast<float>(i);
             float x = 0.0f + radius * std::cos(theta);
             float y = 0.0f +radius * std::sin(theta);
             vertices.push_back(x);

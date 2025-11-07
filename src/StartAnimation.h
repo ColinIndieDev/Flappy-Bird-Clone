@@ -11,7 +11,7 @@ namespace StartAnimation {
     inline std::unique_ptr<Texture2D> texture;
 
     inline void Init() {
-        texture = std::make_unique<Texture2D>(Texture2D(Path::GetAssetPath("assets/images/logo.png"), {250, 250}, LINEAR));
+        texture = std::make_unique<Texture2D>(Texture2D("assets/images/logo.png", {250, 250}, LINEAR));
     }
 
     inline void Update() {
