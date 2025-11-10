@@ -59,16 +59,42 @@ Others:
 ### Documentation
 
 ### General stuff
+PRIORITIZE_CPU_BY_VENDOR (!IMPORTANT! Windows OS only)
 void UpdateCPL();
 int GetFPS();
 float GetDeltaTime();
 float GetTime();
+
+### Random
+!IMPORTANT! 100% = 100.0
+int RandInt(int min, int max);
+float RandFloat(float min, float max);
+bool RandByPercentInt(int percent);
+bool RandByPercentFloat(float percent);
+
+### Timer
+!IMPORTANT! duration in s, if loop is true, then timer updates every frame even without being in the game loop
+void TimerManager::AddTimer(float duration, bool loop, std::function<void()> event);
+void TimerManager::StopTimers();
+void TimerManager::ClearTimers();
+
+### Audio
+Audio AudioManager::LoadAudio(std::string audioPath);
+void AudioManager::PlaySFX(Audio audio);
+void AudioManager::PlaySFXPitch(Audio audio, float pitch);
+void AudioManager::PlayMusic(Audio audio);
+void AudioManager::PlayMusicPitch(Audio audio, float pitch);
+void AudioManager::PauseMusic();
+void AudioManager::ResumeMusic();
+void AudioManager::StopMusic();
 
 ### Window
 void InitWindow(int width, int height, const char* title);
 void SetWindowIcon(std::string imagePath);
 void CloseWindow();
 
+### 2D Camera
+Camera2D camera;
 ### Drawing
 DrawModes:
 SHAPE_2D
@@ -101,6 +127,9 @@ bool CheckCollisionVec2Rect(glm::vec2 one, Rectangle two);
 void DrawText(glm::vec2 position, float scale, std::string text, Color color);
 void DrawTextShadow(glm::vec2 position, glm::vec2 shadowOffset, float scale, std::string text, Color color, Color shadowColor);
 void ShowDetails();
+
+glm::vec2 GetTextSize(std::string fontName, std::string text, float scale);
+void Text::Init(std::string fontPath, std::string fontName, TextureFiltering filteringMode);
 
 ### Drawing primitives
 !IMPORTANT! RGBA 0-255 & angle in degrees
