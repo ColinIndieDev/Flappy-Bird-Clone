@@ -48,9 +48,63 @@ and modify it potentially for personal purpose
 - drawing texts with custom fonts with freetype
 - 2D camera
 - creating and drawing tilemaps
+- 2D lighting
 
 Others:
 - random number generator or probabilities by percent
 - key and mouse inputs
 - audio for playing sounds & music
 - timer & cooldowns
+
+### Documentation
+
+### General stuff
+void UpdateCPL();
+int GetFPS();
+float GetDeltaTime();
+float GetTime();
+
+### Window
+void InitWindow(int width, int height, const char* title);
+void SetWindowIcon(std::string imagePath);
+void CloseWindow();
+
+### Drawing
+DrawModes:
+SHAPE_2D
+SHAPE_2D_LIGHT
+TEXTURE_2D
+TEXT
+
+void ClearBackground(Color color);
+void BeginDrawing(DrawModes mode, bool mode2D);
+void EndDrawing();
+
+### Input
+bool IsKeyDown(int key);
+bool IsKeyUp(int key);
+bool IsKeyPressedOnce(int key);
+bool IsKeyReleased(int key);
+
+bool IsMouseDown(int button);
+bool IsMousePressedOnce(int button);
+bool IsMouseReleased(int button);
+glm::vec2 GetMousePosition();
+glm::vec2 GetMousePositionWorld();
+
+### Collisions
+bool CheckCollisionRects(Rectangle one, Rectangle two);
+bool CheckCollisionCircleRect(Circle one, Rectangle two);
+bool CheckCollisionVec2Rect(glm::vec2 one, Rectangle two);
+
+### Drawing text
+void DrawText(glm::vec2 position, float scale, std::string text, Color color);
+void DrawTextShadow(glm::vec2 position, glm::vec2 shadowOffset, float scale, std::string text, Color color, Color shadowColor);
+void ShowDetails();
+
+### Drawing primitives
+!IMPORTANT! RGBA 0-255 & angle in degrees
+void DrawRectangle(glm::vec2 position, glm::vec2 size, Color color);
+void DrawRectangleRotated(glm::vec2 position, glm::vec2 size, float angle, Color color);
+void DrawRectangle(glm::vec2 position, glm::vec2 size, Color color);
+void DrawRectangleRotOut(glm::vec2 position, glm::vec2 size, float angle, Color color);
