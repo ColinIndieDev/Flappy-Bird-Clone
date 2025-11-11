@@ -2,7 +2,7 @@ Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International Licen
 
 Copyright (c) 2025 Colin Pham alias Colin(Indie)Dev
 ____________________________________________________________________________________________________________________
-This project and its source code are licensed under the Creative Commons
+Only the CPLibrary and its source code are licensed under the Creative Commons
 Attribution-NonCommercial-NoDerivatives 4.0 International License (CC BY-NC-ND 4.0).
 ____________________________________________________________________________________________________________________
 You are free to:
@@ -15,8 +15,8 @@ Under the following terms:
 - NoDerivatives — If you remix, transform, or build upon the material, you may not distribute the modified material.
 ____________________________________________________________________________________________________________________
 Exceptions:
-- You may use the contained "CPLibrary" as a library/framework for personal or educational projects,
-  provided you give credit to Colin Pham (or the aliases).
+- You can do anything you want with the code from the game itself (in src/ ) since it is nothing special and the code is
+  used for creating a clone of an existing game
 ____________________________________________________________________________________________________________________
 ____________________________________________________________________________________________________________________
 Full license text: https://creativecommons.org/licenses/by-nc-nd/4.0/
