@@ -13,7 +13,7 @@ namespace CPL {
         std::ifstream vShaderFile;
         std::ifstream fShaderFile;
 
-        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try {
             vShaderFile.open(vertexPath);
@@ -76,6 +76,10 @@ namespace CPL {
 
     void Shader::SetMatrix4fv(const std::string& name, const glm::mat4& matrix) const {
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+    }
+
+    void Shader::SetVector2f(const std::string& name, const glm::vec2& vec2) const {
+	glUniform2f(glGetUniformLocation(ID, name.c_str()), vec2.x, vec2.y);
     }
 
     void Shader::SetVector3f(const std::string& name, const glm::vec3& vec3) const {

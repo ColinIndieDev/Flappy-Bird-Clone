@@ -4,39 +4,29 @@ project(OpenGLGame)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# -----------------------------
-# Detect Web platform (Emscripten)
-# -----------------------------
-# if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-#    set(PLATFORM "Web")
-#endif()
-# -----------------------------
-# GLFW Web-only Options
-# -----------------------------
-# WICHTIG: global, vor FetchContent!
-#set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-#set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-#set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-#set(GLFW_USE_POSIX_TIME OFF CACHE BOOL "" FORCE)
-#set(GLFW_BUILD_WSI_EMSCRIPTEN ON CACHE BOOL "" FORCE)
-#set(GLFW_USE_EMSCRIPTEN ON CACHE BOOL "" FORCE)
+include(FetchContent)
 
-# Alle Desktop-Backends deaktivieren
-#set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
-#set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
-#set(GLFW_BUILD_COCOA OFF CACHE BOOL "" FORCE)
-#set(GLFW_BUILD_WIN32 OFF CACHE BOOL "" FORCE)
-#set(GLFW_USE_OSMESA OFF CACHE BOOL "" FORCE)
-#set(GLFW_USE_HYBRID_HPG OFF CACHE BOOL "" FORCE)
+if (EMSCRIPTEN)
+    set(GLFW_BUILD_WSI_EMSCRIPTEN ON CACHE BOOL "" FORCE)
+    set(GLFW_USE_POSIX_TIME OFF CACHE BOOL "" FORCE)
+    set(GLFW_USE_EMSCRIPTEN ON CACHE BOOL "" FORCE)
+
+    set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_COCOA OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_WIN32 OFF CACHE BOOL "" FORCE)
+    set(GLFW_USE_OSMESA OFF CACHE BOOL "" FORCE)
+endif()
 
 # GLFW
-include(FetchContent)
-FetchContent_Declare(
-        glfw
-        GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG master
-)
-FetchContent_MakeAvailable(glfw)
+if(NOT EMSCRIPTEN)
+    FetchContent_Declare(
+            glfw
+            GIT_REPOSITORY https://github.com/glfw/glfw.git
+            GIT_TAG master
+    )
+    FetchContent_MakeAvailable(glfw)
+endif()
 
 # GLM
 FetchContent_Declare(
@@ -75,9 +65,11 @@ target_include_directories(miniaudio INTERFACE "${CMAKE_BINARY_DIR}/_deps/miniau
 # GLAD
 add_subdirectory(external/glad)
 
-add_executable(OpenGLGame src/main.cpp
-        src/resources.rc
-        src/StartAnimation.h
+# Remove WIN32 if is not for release
+add_executable(OpenGLGame WIN32 src/main.cpp 
+	src/resources.rc	
+	src/StartAnimation.h
+
         CPLibrary/Shader.cpp
         CPLibrary/Shader.h
         CPLibrary/shapes2D/Triangle.cpp
@@ -96,6 +88,8 @@ add_executable(OpenGLGame src/main.cpp
         CPLibrary/shapes2D/Line.h
         CPLibrary/shapes2D/Texture2D.cpp
         CPLibrary/shapes2D/Texture2D.h
+	CPLibrary/shapes2D/ScreenQuad.cpp
+	CPLibrary/shapes2D/ScreenQuad.h
         CPLibrary/timers/Timer.h
         CPLibrary/timers/TimerManager.cpp
         CPLibrary/timers/TimerManager.h
@@ -103,41 +97,42 @@ add_executable(OpenGLGame src/main.cpp
         CPLibrary/Logging.h
         CPLibrary/Audio.cpp
         CPLibrary/Audio.h
-        CPLibrary/Path.h
 )
+
+# Disable opening terminal (release)
+if (WIN32)
+    target_link_options(OpenGLGame PRIVATE -Wl,/ENTRY:mainCRTStartup)
+endif()
 
 # Include directories
 target_include_directories(OpenGLGame PRIVATE ${stb_SOURCE_DIR})
 
 # Link libraries
-target_link_libraries(OpenGLGame PRIVATE glfw glad freetype miniaudio glm)
+target_link_libraries(OpenGLGame PRIVATE glad freetype miniaudio glm)
 
-# -----------------------------
-# Desktop-specific
-# -----------------------------
-#if (WIN32 AND NOT PLATFORM STREQUAL "Web")
-#    set_target_properties(OpenGLGame PROPERTIES WIN32_EXECUTABLE TRUE)
-#    target_link_libraries(OpenGLGame PRIVATE opengl32)
-#endif()
-# -----------------------------
-# Web-specific
-# -----------------------------
-#if(PLATFORM STREQUAL "Web")
-#    set_target_properties(OpenGLGame PROPERTIES SUFFIX ".html")
+if (NOT EMSCRIPTEN)
+    target_link_libraries(OpenGLGame PRIVATE glfw)
+endif()
 
-#    set(ASSETS_SRC_DIR "${CMAKE_SOURCE_DIR}/assets")
-#    set(ASSETS_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets")
-#    add_custom_command(TARGET OpenGLGame POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E copy_directory
-#            ${ASSETS_SRC_DIR} ${ASSETS_DST_DIR}
-#    )
+if(EMSCRIPTEN)
+    add_definitions(-D__EMSCRIPTEN__)
+    set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
+    target_link_options(OpenGLGame PRIVATE
+        "--preload-file" "${ASSETS_DIR}@/assets"
+	"-sMIN_WEBGL_VERSION=2"
+	"-sMAX_WEBGL_VERSION=2"
+        "-sUSE_GLFW=3"
+        "-sALLOW_MEMORY_GROWTH=1"
+        "-sFORCE_FILESYSTEM=1"
+        "-sSAFE_HEAP=1"
 
-#    target_link_options(OpenGLGame PRIVATE
-#            "-sUSE_GLFW=3"
-#            "-sASYNCIFY"
-#            "-sFULL_ES2=1"
-#            "-sFORCE_FILESYSTEM=1"
-#            "--preload-file"
-#            "${CMAKE_SOURCE_DIR}/assets@/assets"
-#    )
-#endif()
+        "-gsource-map" 
+        "-sASSERTIONS=2" 
+        "-sSTACK_SIZE=1mb" 
+        "-sDISABLE_EXCEPTION_CATCHING=0" 
+        "-fexceptions" 
+        "-sGL_DEBUG=1" 
+        "-g"
+    )
+    set_target_properties(OpenGLGame PROPERTIES SUFFIX ".html")
+endif()

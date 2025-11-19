@@ -1,14 +1,13 @@
 #include "../CPLibrary/CPLibrary.h"
-
+#ifdef __EMSCRIPTEN__
+    #include <emscripten/emscripten.h>
+#endif
 #include "StartAnimation.h"
 #include <filesystem>
 #include <fstream>
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
-#endif
-
 using namespace CPL;
+
 PRIORITIZE_GPU_BY_VENDOR
 
 class Bird {
@@ -52,18 +51,45 @@ std::vector<Pipe> pipes;
 class Background {
 public:
     std::vector<glm::vec2> skyPositions;
+    std::vector<glm::vec2> buildingsPositions;
+    std::vector<glm::vec2> woodsPositions;
 
     void Init() {
         skyPositions.emplace_back(0, 0);
         skyPositions.emplace_back(GetScreenWidth(), 0);
+	buildingsPositions.emplace_back(0, 0);
+        buildingsPositions.emplace_back(GetScreenWidth(), 0);
+	woodsPositions.emplace_back(0, 0);
+        woodsPositions.emplace_back(GetScreenWidth(), 0);
     }
     void Update() {
-        for (auto& position : skyPositions) {
-            if (position.x + GetScreenWidth() <= 0) {
-                skyPositions.erase(skyPositions.begin());
-                skyPositions.emplace_back(skyPositions.end()->x + GetScreenWidth(), 0);
-            }
+	for (auto& position : skyPositions) {
+            position.x -= 15.0f * GetDeltaTime();
+	}
+	for (auto& position : buildingsPositions) {
             position.x -= 25.0f * GetDeltaTime();
+	}
+        for (auto& position : woodsPositions) {
+            position.x -= 35.0f * GetDeltaTime();
+	}
+
+        if (!skyPositions.empty() && skyPositions.front().x + GetScreenWidth() <= 0) {
+
+            float rightmostX = skyPositions.back().x;
+            skyPositions.erase(skyPositions.begin());
+            skyPositions.emplace_back(rightmostX + GetScreenWidth(), 0);
+        }
+	if (!buildingsPositions.empty() && buildingsPositions.front().x + GetScreenWidth() <= 0) {
+
+            float rightmostX = buildingsPositions.back().x;
+            buildingsPositions.erase(buildingsPositions.begin());
+            buildingsPositions.emplace_back(rightmostX + GetScreenWidth(), 0);
+        }
+	if (!woodsPositions.empty() && woodsPositions.front().x + GetScreenWidth() <= 0) {
+
+            float rightmostX = woodsPositions.back().x;
+            woodsPositions.erase(woodsPositions.begin());
+            woodsPositions.emplace_back(rightmostX + GetScreenWidth(), 0);
         }
     }
 };
@@ -83,26 +109,26 @@ public:
     static void Menu() {
         const std::string title = "Flappy Bird";
         const float textWidth = Text::GetTextSize("defaultFont", title, 2).x;
-        DrawTextShadow({GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() - 48 * 3},{5, 5}, 2, title, WHITE, DARK_GRAY);
+        DrawTextShadow({GetScreenWidth() / 2 - textWidth / 2, 48 * 2},{5, 5}, 2, title, WHITE, DARK_GRAY);
 
         const std::string info = "[ Click to start ]";
         const float textWidthInfo = Text::GetTextSize("defaultFont", info, 0.5).x;
-        DrawTextShadow({GetScreenWidth() / 2 - textWidthInfo / 2, GetScreenHeight() / 4},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
+        DrawTextShadow({GetScreenWidth() / 2 - textWidthInfo / 2, GetScreenHeight() / 1.5f},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
 
         const float textWidthHighscore = Text::GetTextSize("defaultFont", "Highscore: " + std::to_string(static_cast<int>(std::floor(highscore))), 0.75).x;
-        DrawTextShadow({GetScreenWidth() / 2 - textWidthHighscore / 2, GetScreenHeight() / 1.6},{5, 5}, 0.75, "Highscore: " + std::to_string(static_cast<int>(std::floor(highscore))), WHITE, DARK_GRAY);
+        DrawTextShadow({GetScreenWidth() / 2 - textWidthHighscore / 2, 48 * 5},{5, 5}, 0.75, "Highscore: " + std::to_string(static_cast<int>(std::floor(highscore))), WHITE, DARK_GRAY);
     }
     static void GameOver() {
         const std::string title = "Game Over";
         const float textWidth = Text::GetTextSize("defaultFont", title, 2).x;
-        DrawTextShadow({GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() - 48 * 3},{5, 5}, 2, title, WHITE, DARK_GRAY);
+        DrawTextShadow({GetScreenWidth() / 2 - textWidth / 2, 48 * 2},{5, 5}, 2, title, WHITE, DARK_GRAY);
 
         const std::string info = "[ Click to restart ]";
         const float textWidthInfo = Text::GetTextSize("defaultFont", info, 0.5).x;
-        DrawTextShadow({GetScreenWidth() / 2 - textWidthInfo / 2, GetScreenHeight() / 4},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
+        DrawTextShadow({GetScreenWidth() / 2 - textWidthInfo / 2, GetScreenHeight() / 1.5f},{5, 5}, 0.5, info, WHITE, DARK_GRAY);
 
         const float textWidthHighscore = Text::GetTextSize("defaultFont", "Highscore: " + std::to_string(static_cast<int>(std::floor(highscore))), 0.75).x;
-        DrawTextShadow({GetScreenWidth() / 2 - textWidthHighscore / 2, GetScreenHeight() / 1.6},{5, 5}, 0.75, "Highscore: " + std::to_string(static_cast<int>(std::floor(highscore))), WHITE, DARK_GRAY);
+        DrawTextShadow({GetScreenWidth() / 2 - textWidthHighscore / 2, 48 * 5},{5, 5}, 0.75, "Highscore: " + std::to_string(static_cast<int>(std::floor(highscore))), WHITE, DARK_GRAY);
     }
 };
 
@@ -148,6 +174,8 @@ void RemovePipe() {
 }
 
 std::unique_ptr<Texture2D> skyTexture;
+std::unique_ptr<Texture2D> buildingsTexture;
+std::unique_ptr<Texture2D> woodsTexture;
 std::unique_ptr<Texture2D> birdTexture;
 std::unique_ptr<Texture2D> pipeTexture;
 Bird player{};
@@ -159,7 +187,6 @@ Audio music;
 
 void MainLoop() {
     UpdateCPL();
-
     if (!StartAnimation::isFading) HandleInput(player, flySound, restartSound);
     UpdateHighScore();
     if (!gameOver) background.Update();
@@ -204,6 +231,12 @@ void MainLoop() {
     for (auto& position : background.skyPositions) {
         DrawTexture2D(skyTexture.get(), position, WHITE);
     }
+    for (auto& position : background.buildingsPositions) {
+        DrawTexture2D(buildingsTexture.get(), position, WHITE);
+    }
+    for (auto& position : background.woodsPositions) {
+        DrawTexture2D(woodsTexture.get(), position, WHITE);
+    }
     for (const auto& pipe : pipes) {
         DrawTexture2DRotated(pipeTexture.get(), pipe.position - glm::vec2(0, pipe.size.y + 145), 180, WHITE);
         DrawTexture2DRotated(pipeTexture.get(), pipe.position - glm::vec2(0, 0), 0, WHITE);
@@ -221,29 +254,37 @@ void MainLoop() {
     BeginDrawing(TEXT, false);
     if (!gameOver && player.isFalling) score += 1 * GetDeltaTime();
     float textWidth = Text::GetTextSize("defaultFont", std::to_string(static_cast<int>(std::floor(score))), 1).x;
-    if (player.isFalling) DrawTextShadow({GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() - 48}, {5, 5}, 1,
+    if (player.isFalling) DrawTextShadow({GetScreenWidth() / 2 - textWidth / 2, 10}, {5, 5}, 1.5f,
                                          std::to_string(static_cast<int>(std::floor(score))), WHITE, DARK_GRAY);
     if (!player.isFalling) UI::Menu();
     if (gameOver && !isRestarting) UI::GameOver();
 
-    ShowDetails();
+    #ifndef __EMSCRIPTEN__
+        ShowDetails();
+    #endif
 
     StartAnimation::Update();
     EndDrawing();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+
 }
 int main() {
-    InitWindow(800, 600, "Flappy Bird OpenGL");
-    SetWindowIcon("assets/images/icon.png");
+    InitWindow(800, 600, "Flappy Bird Clone");
+    
+    #ifndef __EMSCRIPTEN__
+        SetWindowIcon("assets/images/icon.png");
+        InitHighScoreFile();
+        ReadHighScore();
+    #endif
 
-    InitHighScoreFile();
-    ReadHighScore();
     player.position = {GetScreenWidth() / 2, GetScreenHeight() / 2};
     camera.position = glm::vec2{GetScreenWidth() / 2, GetScreenHeight() / 2};
     background.Init();
-    skyTexture = std::make_unique<Texture2D>(Texture2D("assets/images/background.png", {GetScreenWidth(), GetScreenHeight()}, LINEAR));
+    skyTexture = std::make_unique<Texture2D>(Texture2D("assets/images/sky.png", {GetScreenWidth(), GetScreenHeight()}, LINEAR));
+    buildingsTexture = std::make_unique<Texture2D>(Texture2D("assets/images/buildings.png", {GetScreenWidth(), GetScreenHeight()}, LINEAR));
+    woodsTexture = std::make_unique<Texture2D>(Texture2D("assets/images/woods.png", {GetScreenWidth(), GetScreenHeight()}, LINEAR));
     birdTexture = std::make_unique<Texture2D>(Texture2D("assets/images/bird.png", {100, 100}, LINEAR));
     pipeTexture = std::make_unique<Texture2D>(Texture2D("assets/images/pipe.png", {100, 500}, LINEAR));
     damageSound = AudioManager::LoadAudio("assets/sounds/damage.wav");
@@ -255,14 +296,17 @@ int main() {
     AudioManager::PlayMusic(music);
 
     #ifdef __EMSCRIPTEN__
-        emscripten_set_main_loop(MainLoop, 0, 1);
+        emscripten_set_main_loop(MainLoop, 0, true);
     #else
-        while (!WindowShouldClose()) {
-            MainLoop();
-        }
+	while (!WindowShouldClose()) {
+	    MainLoop();
+	}
     #endif
 
-    SaveHighScore();
+    #ifndef __EMSCRIPTEN__
+        SaveHighScore();
+    #endif
+
     CloseWindow();
 }
 

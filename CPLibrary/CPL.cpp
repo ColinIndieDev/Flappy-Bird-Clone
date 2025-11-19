@@ -4,6 +4,8 @@
 #include "shapes2D/Rectangle.h"
 #include "shapes2D/Circle.h"
 #include "shapes2D/Line.h"
+#include "shapes2D/PointLight.h"
+#include "shapes2D/ScreenQuad.h"
 #include "Shader.h"
 #include "Text.h"
 #include "shapes2D/Texture2D.h"
@@ -14,6 +16,10 @@ namespace CPL {
     Shader shapeShader;
     Shader textShader;
     Shader textureShader;
+    Shader lightShapeShader;
+    Shader screenShader;
+
+    ScreenQuad screenQuad;
 
     void UpdateCPL() {
         UpdateInput();
@@ -33,13 +39,13 @@ namespace CPL {
 
         BeginDrawing(TEXT, false);
         const std::string fpsText = "FPS: " + std::to_string(GetFPS());
-        DrawTextShadow({0, 25}, {2, 2}, 0.3, fpsText, WHITE, DARK_GRAY);
+        DrawTextShadow({0, GetScreenHeight() - 130}, {2, 2}, 0.3, fpsText, WHITE, DARK_GRAY);
         const std::string vendorText = "Vendor: " + vendorString;
-        DrawTextShadow({0, 60}, {2, 2}, 0.3, vendorText, WHITE, DARK_GRAY);
+        DrawTextShadow({0, GetScreenHeight() - 95}, {2, 2}, 0.3, vendorText, WHITE, DARK_GRAY);
         const std::string rendererText = "GPU: " + rendererString;
-        DrawTextShadow({0, 95}, {2, 2}, 0.3, rendererText, WHITE, DARK_GRAY);
+        DrawTextShadow({0, GetScreenHeight() - 60}, {2, 2}, 0.3, rendererText, WHITE, DARK_GRAY);
         const std::string versionText = "Version: " + versionString;
-        DrawTextShadow({0, 130}, {2, 2}, 0.3, versionText, WHITE, DARK_GRAY);
+        DrawTextShadow({0, GetScreenHeight() - 25}, {2, 2}, 0.3, versionText, WHITE, DARK_GRAY);
         EndDrawing();
     }
 
@@ -86,11 +92,11 @@ namespace CPL {
 
         SCREEN_WIDTH = width;
         SCREEN_HEIGHT = height;
-        projection = glm::ortho(
-            0.0f, static_cast<float>(width),
-            static_cast<float>(height), 0.0f,
-            -1.0f, 1.0f
-        );
+
+        projection = glm::ortho(0.0f, static_cast<float>(width), 
+			static_cast<float>(height), 0.0f,
+			-1.0f, 1.0f
+		      );
 
         window = glfwCreateWindow(width, height, title, nullptr, nullptr);
         if (window == nullptr) {
@@ -106,8 +112,14 @@ namespace CPL {
         }
 
         InitShaders();
-        Text::Init("assets/fonts/default.ttf", "defaultFont", NEAREST);
+        #ifdef __EMSCRIPTEN__
+            Text::Init("/assets/fonts/default.ttf", "defaultFont", NEAREST);
+        #else
+	    Text::Init("assets/fonts/default.ttf", "defaultFont", NEAREST);
+	#endif
         AudioManager::Init();
+	screenQuad.Init(width, height);
+	InitCharPressed(window);
 
         // ----- For the font & 2D textures ----- //
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -136,13 +148,24 @@ namespace CPL {
     }
 
     void InitShaders() {
-        shapeShader = Shader("CPLibrary/shaders/shader.vert", "CPLibrary/shaders/shader.frag");
-        textShader = Shader("CPLibrary/shaders/text.vert", "CPLibrary/shaders/text.frag");
-        textureShader = Shader("CPLibrary/shaders/texture.vert", "CPLibrary/shaders/texture.frag");
+	#ifdef __EMSCRIPTEN__
+            shapeShader = Shader("/assets/shaders/shader_web.vert", "/assets/shaders/shader_web.frag");
+            textShader = Shader("/assets/shaders/text_web.vert", "/assets/shaders/text_web.frag");
+            textureShader = Shader("/assets/shaders/texture_web.vert", "/assets/shaders/texture_web.frag");
+	    lightShapeShader = Shader("/assets/shaders/lightShader_web.vert", "/assets/shaders/lightShader_web.frag");
+    	    screenShader = Shader("/assets/shaders/screen_web.vert", "/assets/shaders/screen_web.frag");
+	#else
+	    shapeShader = Shader("assets/shaders/shader.vert", "assets/shaders/shader.frag");
+            textShader = Shader("assets/shaders/text.vert", "assets/shaders/text.frag");
+            textureShader = Shader("assets/shaders/texture.vert", "assets/shaders/texture.frag");
+    	    lightShapeShader = Shader("assets/shaders/lightShader.vert", "assets/shaders/lightShader.frag");
+	    screenShader = Shader("assets/shaders/screen.vert", "assets/shaders/screen.frag");
+        #endif
     }
 
     void BeginDrawing(const DrawModes& mode, const bool mode2D) {
         Shader shader{};
+	currentDrawMode = mode;
         if (mode == SHAPE_2D) shader = shapeShader;
         else if (mode == TEXT) {
             shader = textShader;
@@ -151,63 +174,90 @@ namespace CPL {
             Text::Use("defaultFont");
         }
         else if (mode == TEXTURE_2D) shader = textureShader;
+	else if (mode == SHAPE_2D_LIGHT) shader = lightShapeShader;
 
         shader.Use();
         const glm::mat4 view = camera.GetViewMatrix();
         const glm::mat4 viewProjection = projection * view;
         shader.SetMatrix4fv("projection", mode2D ? viewProjection : projection);
     }
+    void SetAmbientLight(const float strength) {
+	lightShapeShader.SetFloat("ambient", strength);
+    }
+    void AddPointLights(const std::vector<PointLight>& lights) {
+	lightShapeShader.SetInt("numPointLights", lights.size());
+
+	for (int i = 0; i < lights.size(); i++) {
+            lightShapeShader.SetVector2f("pointLights[" + std::to_string(i) + "].position", lights[i].position);
+            lightShapeShader.SetFloat("pointLights[" + std::to_string(i) + "].radius", lights[i].radius);
+	    lightShapeShader.SetFloat("pointLights[" + std::to_string(i) + "].intensity", lights[i].intensity);
+            lightShapeShader.SetColor("pointLights[" + std::to_string(i) + "].color", lights[i].color);
+        }
+    }
+
+    void BeginPostProcessing() {
+	screenQuad.BeginUseScreen();
+    }
+    void EndPostProcessing() {
+	screenQuad.EndUseScreen();
+    }
+    void ApplyPostProcessing(const PostProcessingModes& mode) {
+	screenQuad.Draw(mode);
+    }
+    void ApplyPostProcessingCustom(const Shader& shader) {
+	screenQuad.DrawCustom(shader);
+    }
 
     void DrawTriangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
         const auto triangle = Triangle(position, size, color);
-        triangle.Draw(shapeShader, true);
+        triangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, true);
     }
     void DrawTriangleRotated(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
         const auto triangle = Triangle(position, size, color);
         triangle.rotationAngle = angle;
-        triangle.Draw(shapeShader, true);
+        triangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, true);
     }
     void DrawTriangleOutline(const glm::vec2 position, const glm::vec2 size, const Color& color) {
         const auto triangle = Triangle(position, size, color);
-        triangle.Draw(shapeShader, false);
+        triangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, false);
     }
     void DrawTriangleRotOut(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
         const auto triangle = Triangle(position, size, color);
         triangle.rotationAngle = angle;
-        triangle.Draw(shapeShader, false);
+        triangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, false);
     }
 
     void DrawRectangle(const glm::vec2 position, const glm::vec2 size, const Color& color) {
         const auto rectangle = Rectangle(position, size, color);
-        rectangle.Draw(shapeShader, true);
+        rectangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, true);
     }
     void DrawRectangleRotated(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
         const auto rectangle = Rectangle(position, size, color);
         rectangle.rotationAngle = angle;
-        rectangle.Draw(shapeShader, true);
+        rectangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, true);
     }
     void DrawRectangleOutline(const glm::vec2 position, const glm::vec2 size, const Color& color) {
         const auto rectangle = Rectangle(position, size, color);
-        rectangle.Draw(shapeShader, false);
+        rectangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, false);
     }
     void DrawRectangleRotOut(const glm::vec2 position, const glm::vec2 size, const float angle, const Color& color) {
         const auto rectangle = Rectangle(position, size, color);
         rectangle.rotationAngle = angle;
-        rectangle.Draw(shapeShader, false);
+        rectangle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader, false);
     }
 
     void DrawCircle(const glm::vec2 position, const float radius, const Color& color) {
         const auto circle = Circle(position, radius, color);
-        circle.Draw(shapeShader);
+        circle.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader);
     }
     void DrawCircleOutline(const glm::vec2 position, const float radius, const Color& color) {
         const auto circle = Circle(position, radius, color);
-        circle.DrawOutline(shapeShader);
+        circle.DrawOutline(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader);
     }
 
     void DrawLine(const glm::vec2 startPos, const glm::vec2 endPos, const Color& color) {
         const auto line = Line(startPos, endPos, color);
-        line.Draw(shapeShader);
+        line.Draw(currentDrawMode == SHAPE_2D_LIGHT ? lightShapeShader : shapeShader);
     }
 
     void DrawTexture2D(Texture2D* texture, const glm::vec2 position, const Color& color) {

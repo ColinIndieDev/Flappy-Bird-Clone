@@ -72,7 +72,6 @@ namespace CPL {
         }
     }
 
-
     void Rectangle::Draw(const Shader& shader, const bool filled) const {
         auto transform = glm::mat4(1.0f);
         const glm::vec2 center = {position.x + size.x / 2, position.y + size.y / 2};
@@ -83,6 +82,27 @@ namespace CPL {
         shader.SetMatrix4fv("transform", transform);
         shader.SetVector3f("offset", glm::vec3(position, 0.0f));
         shader.SetColor("inputColor", color);
+        if (filled) {
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        }
+        else {
+            glBindVertexArray(outlineVAO);
+            glDrawElements(GL_LINE_LOOP, 6, GL_UNSIGNED_INT, nullptr);
+        }
+        glBindVertexArray(0);
+    }
+    
+    void Rectangle::DrawLight(const Shader& shader, const bool filled) const {
+	auto transform = glm::mat4(1.0f);
+        const glm::vec2 center = {position.x + size.x / 2, position.y + size.y / 2};
+        transform = glm::translate(transform, glm::vec3(center, 0.0f));
+        transform = glm::rotate(transform, glm::radians(rotationAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+        transform = glm::translate(transform, glm::vec3(-center, 0.0f));
+
+        shader.SetMatrix4fv("transform", transform);
+        shader.SetVector3f("offset", glm::vec3(position, 0.0f));
+        shader.SetColor("objectColor", color);
         if (filled) {
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

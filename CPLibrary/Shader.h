@@ -18,6 +18,7 @@ namespace CPL {
         void SetFloat(const std::string &name, float value) const;
         void SetColor(const std::string &name, const Color& color) const;
         void SetMatrix4fv(const std::string &name, const glm::mat4& matrix) const;
+	void SetVector2f(const std::string &name, const glm::vec2& vec2) const;
         void SetVector3f(const std::string &name, const glm::vec3& vec3) const;
     private:
         static void CheckCompileErrors(unsigned int shader, const std::string& type);

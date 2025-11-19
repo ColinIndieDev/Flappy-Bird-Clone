@@ -8,6 +8,8 @@
 #include "../CPLibrary/shapes2D/Rectangle.h"
 #include "../CPLibrary/shapes2D/Line.h"
 #include "../CPLibrary/shapes2D/Texture2D.h"
+#include "../CPLibrary/shapes2D/PointLight.h"
+#include "../CPLibrary/shapes2D/ScreenQuad.h"
 #include "../CPLibrary/timers/TimerManager.h"
 #include "../CPLibrary/Shader.h"
 #include "../CPLibrary/Text.h"

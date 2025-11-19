@@ -17,6 +17,7 @@ namespace CPL {
         explicit Rectangle(glm::vec2 pos, glm::vec2 size, Color color);
         ~Rectangle();
         void Draw(const Shader& shader, bool filled) const;
+	void DrawLight(const Shader& shader, bool filled) const;
     private:
         unsigned int outlineVBO{}, outlineVAO{}, outlineEBO{};
         unsigned int VBO{}, VAO{}, EBO{};
