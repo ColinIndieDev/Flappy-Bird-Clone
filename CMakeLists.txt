@@ -115,7 +115,6 @@ if (NOT EMSCRIPTEN)
 endif()
 
 if(EMSCRIPTEN)
-    add_definitions(-D__EMSCRIPTEN__)
     set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
     target_link_options(OpenGLGame PRIVATE
         "--preload-file" "${ASSETS_DIR}@/assets"
