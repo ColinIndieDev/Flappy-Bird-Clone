@@ -66,43 +66,37 @@ target_include_directories(miniaudio INTERFACE "${CMAKE_BINARY_DIR}/_deps/miniau
 add_subdirectory(external/glad)
 
 # Remove WIN32 if is not for release
-add_executable(OpenGLGame WIN32 src/main.cpp 
-	src/resources.rc	
+add_executable(OpenGLGame src/main.cpp 
 	src/StartAnimation.h
 
-        CPLibrary/Shader.cpp
-        CPLibrary/Shader.h
-        CPLibrary/shapes2D/Triangle.cpp
-        CPLibrary/shapes2D/Triangle.h
-        CPLibrary/CPL.h
-        CPLibrary/CPL.cpp
-        CPLibrary/shapes2D/Rectangle.cpp
-        CPLibrary/shapes2D/Rectangle.h
-        CPLibrary/shapes2D/Circle.cpp
-        CPLibrary/shapes2D/Circle.h
-        CPLibrary/Colors.h
-        CPLibrary/KeyInputs.h
-        CPLibrary/Text.cpp
-        CPLibrary/Text.h
-        CPLibrary/shapes2D/Line.cpp
-        CPLibrary/shapes2D/Line.h
-        CPLibrary/shapes2D/Texture2D.cpp
-        CPLibrary/shapes2D/Texture2D.h
+    CPLibrary/Shader.cpp
+    CPLibrary/Shader.h
+    CPLibrary/shapes2D/Triangle.cpp
+    CPLibrary/shapes2D/Triangle.h
+    CPLibrary/CPL.h
+    CPLibrary/CPL.cpp
+    CPLibrary/shapes2D/Rectangle.cpp
+    CPLibrary/shapes2D/Rectangle.h
+    CPLibrary/shapes2D/Circle.cpp
+    CPLibrary/shapes2D/Circle.h
+    CPLibrary/Colors.h
+    CPLibrary/KeyInputs.h
+    CPLibrary/Text.cpp
+    CPLibrary/Text.h
+    CPLibrary/shapes2D/Line.cpp
+    CPLibrary/shapes2D/Line.h
+    CPLibrary/shapes2D/Texture2D.cpp
+    CPLibrary/shapes2D/Texture2D.h
 	CPLibrary/shapes2D/ScreenQuad.cpp
 	CPLibrary/shapes2D/ScreenQuad.h
-        CPLibrary/timers/Timer.h
-        CPLibrary/timers/TimerManager.cpp
-        CPLibrary/timers/TimerManager.h
-        CPLibrary/CPLibrary.h
-        CPLibrary/Logging.h
-        CPLibrary/Audio.cpp
-        CPLibrary/Audio.h
+    CPLibrary/timers/Timer.h
+    CPLibrary/timers/TimerManager.cpp
+    CPLibrary/timers/TimerManager.h
+    CPLibrary/CPLibrary.h
+    CPLibrary/Logging.h
+    CPLibrary/Audio.cpp
+    CPLibrary/Audio.h
 )
-
-# Disable opening terminal (release)
-if (WIN32)
-    target_link_options(OpenGLGame PRIVATE -Wl,/ENTRY:mainCRTStartup)
-endif()
 
 # Include directories
 target_include_directories(OpenGLGame PRIVATE ${stb_SOURCE_DIR})
@@ -111,7 +105,19 @@ target_include_directories(OpenGLGame PRIVATE ${stb_SOURCE_DIR})
 target_link_libraries(OpenGLGame PRIVATE glad freetype miniaudio glm)
 
 if (NOT EMSCRIPTEN)
+    set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
+
     target_link_libraries(OpenGLGame PRIVATE glfw)
+    
+    # Linux-specific: Link required system libraries
+    if (UNIX AND NOT APPLE)
+        target_link_libraries(OpenGLGame PRIVATE
+            dl          # Dynamic loading
+            pthread     # Threading
+            m           # Math library
+        )
+    endif()
 endif()
 
 if(EMSCRIPTEN)
