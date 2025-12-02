@@ -65,7 +65,6 @@ target_include_directories(miniaudio INTERFACE "${CMAKE_BINARY_DIR}/_deps/miniau
 # GLAD
 add_subdirectory(external/glad)
 
-# Remove WIN32 if is not for release
 add_executable(OpenGLGame src/main.cpp 
 	src/StartAnimation.h
 
@@ -105,8 +104,8 @@ target_include_directories(OpenGLGame PRIVATE ${stb_SOURCE_DIR})
 target_link_libraries(OpenGLGame PRIVATE glad freetype miniaudio glm)
 
 if (NOT EMSCRIPTEN)
-    set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
-    set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
 
     target_link_libraries(OpenGLGame PRIVATE glfw)
     
